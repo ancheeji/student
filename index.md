@@ -58,9 +58,9 @@ Hi! My name is [Your Full Name].
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 />
-<i class="fa-solid fa-user"></i>  <!-- Solid user icon -->
-<i class="fa-regular fa-heart"></i> <!-- Regular heart icon -->
-<i class="fa-brands fa-github"></i>  <!-- GitHub brand icon -->
+<i class="fa-solid fa-user" style="color:blue; font-size:24px;"></i>  <!-- Solid user icon -->
+<i class="fa-regular fa-heart" style="color:green; font-size:24px;"></i> <!-- Regular heart icon -->
+<i class="fa-brands fa-github" style="color:red; font-size:24px;"></i>  <!-- GitHub brand icon -->
 <br>
 
 <!-- Contact Section -->
