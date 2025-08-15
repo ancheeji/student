@@ -31,9 +31,13 @@ Hi! My name is [Your Full Name].
 <a href="https://kasm.opencodingsociety.com/" class="button small" style="background-color: #6b4bd3ff">
     KASM
 </a>
-<a href="https://vscode.dev/" class="button small" style="background-color: #d38a4bff">
+<a href="https://vscode.dev/" class="button small" style="background-color: #4bd371ff">
     <span style="color: #FFFFFF">VSCODE</span>
 </a>
+<a href="https://www.markdownguide.org/cheat-sheet/" class="button small" style="background-color: #0ac1eaff">
+    <span style="color: #f2ea0aff">markdowncheatsheet</span>
+</a>
+
 
 <br>
 
