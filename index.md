@@ -52,6 +52,12 @@ Hi! My name is [Your Full Name].
 
 <br>
 
+<br>
+<i class="fa-solid fa-user"></i>  <!-- Solid user icon -->
+<i class="fa-regular fa-heart"></i> <!-- Regular heart icon -->
+<i class="fa-brands fa-github"></i>  <!-- GitHub brand icon -->
+<br>
+
 <!-- Contact Section -->
 ### Get in Touch
 
