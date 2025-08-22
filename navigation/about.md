@@ -98,17 +98,27 @@ Here are some places I have lived.
 
 Here are the schools I've went/going to in California:
 
-- 🏫 Monterey Ridge Elementary School, 2015-2021
-- 🏫 Oak Valley Middle School, 2021-2024
-- 🏫 Del Norte High School, 2024-current
+- 👶 Monterey Ridge Elementary School, 2015-2021
+- 👩‍🦰 Oak Valley Middle School, 2021-2024
+- 👵 Del Norte High School, 2024-current
 
 ### Culture, Family, and Fun
 
-Everything for me, as for many others, revolves around family and faith.
+Me, My Culture, and My Family:
 
-- My mother told me that I was Danish, English. and Irish, here is my researched [family tree]({{site.baseurl}}/images/about/familytree.png)
-- My family is pretty big as I have been married twice, my 1st wife passed away.  We have had 5 kids, 4 adopted by me, 1 biological.  Plus, there are three grandkids.  My name to my grandkids is Abuilito.
-- The gallery of pics has some of my family, fun, culture and faith memories.
+- My parents are both from China, but I was born here, so I am American Chinese
+- My brother, who was born in New York, is 21 years old, and goes to University of Washington
+- My first language is English, but I am also mostly fluent in Mandarin 
+- 🩰 I main sport/hobby is competitve dance 
+    - I have been dancing since I was 4 years old
+    - 💃 I am on the Del Norte Dance Team 
+    - My favorite styles are ballet, hip hop, and contemporary 
+    - I currently dance at Inspired Movement Dance where I focus on ballet and contemporary technique
+- Some side hobbies/activites: crochet, watching TV shows or movies, piano, electric guitar, listening to music
+    - 📺 Fav TV shows or movies: Scream, The Texas Chainsaw Massacre, Nezha 1 & 2, The Glory, You (in general I love horrors)
+    - 🎙️ Fav artist: The Weeknd 
+    - 🎶 Fav songs: Lonely Star- The Weeknd, Double Fantasy- The Weeknd, Oxytocin- Billie Eilish, Good God- Korn, IN MY MOUTH- Black Dresses, etc.
+- The pictures below are about me and what I value most in life
 
 <comment>
 Gallery of Pics, scroll to the right for more ...
