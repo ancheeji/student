@@ -138,4 +138,9 @@ Me, My Culture, and My Family:
   <img src="{{site.baseurl}}/images/IMG_7528.JPG" alt="Image 10">
   <img src="{{site.baseurl}}/images/IMG_0168.jpg" alt="Image 11">
   <img src="{{site.baseurl}}/images/IMG_0052.jpeg" alt="Image 12">
+  <img src="{{site.baseurl}}/images/friends.jpg" alt="Friends at Night">
+  <img src="{{site.baseurl}}/images/dance_team.jpg" alt="Dance Team Group Photo">
+  <img src="{{site.baseurl}}/images/grandparents.jpg" alt="With Grandparents">
+  <img src="{{site.baseurl}}/images/promotion.jpg" alt="Graduation with Family">
+
 </div>
