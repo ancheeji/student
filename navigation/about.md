@@ -5,7 +5,7 @@ permalink: /about/
 comments: true
 ---
 
-## As a conversation Starter
+## Learn About Me!
 
 Here are some places I have lived.
 
@@ -90,6 +90,9 @@ Here are some places I have lived.
         container.appendChild(gridItem);
     }
 </script>
+### Birthday
+
+🎂 My birthday is June 21st, 2010
 
 ### Journey through Life
 
