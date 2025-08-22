@@ -5,8 +5,6 @@ permalink: /about/
 comments: true
 ---
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
 ## Learn About Me!
 
 Here are some places I have lived.
@@ -126,7 +124,7 @@ Me, My Culture, and My Family:
 📷 Pictures! Scroll to the right for more ...
 </comment>
 <div class="image-gallery">
-  <img src="{{site.baseurl}}/images/f3f7f4371513d35805b1360a0439af6a.JPG" alt="Image 1">
+  <img src="\\wsl.localhost\Ubuntu-24.04\home\ancheeji\opencs\opencs\student\images\about\images\Promotion_Family.JPG" alt="Image 1">
   <img src="{{site.baseurl}}/images/IMG_5289.JPG" alt="Image 2">
   <img src="{{site.baseurl}}/images/IMG_5634.JPG" alt="Image 3">
   <img src="{{site.baseurl}}/images/IMG_0103.jpg" alt="Image 4">
@@ -138,9 +136,4 @@ Me, My Culture, and My Family:
   <img src="{{site.baseurl}}/images/IMG_7528.JPG" alt="Image 10">
   <img src="{{site.baseurl}}/images/IMG_0168.jpg" alt="Image 11">
   <img src="{{site.baseurl}}/images/IMG_0052.jpeg" alt="Image 12">
-  <img src="{{site.baseurl}}/images/friends.jpg" alt="Friends at Night">
-  <img src="{{site.baseurl}}/images/dance_team.jpg" alt="Dance Team Group Photo">
-  <img src="{{site.baseurl}}/images/grandparents.jpg" alt="With Grandparents">
-  <img src="{{site.baseurl}}/images/promotion.jpg" alt="Graduation with Family">
-
 </div>
