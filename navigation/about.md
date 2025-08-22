@@ -125,7 +125,7 @@ Me, My Culture, and My Family:
 </comment>
 <div class="image-gallery">
   <img src="\\wsl.localhost\Ubuntu-24.04\home\ancheeji\opencs\opencs\student\images\about\images\Promotion_Family.JPG" alt="Image 1">
-  <img src="{{site.baseurl}}/images/IMG_5289.JPG" width="150" height="150" alt="Image 2">
+  <img src="{{site.baseurl}}/images/IMG_5289.JPG" alt="Image 2">
   <img src="{{site.baseurl}}/images/IMG_5634.JPG" alt="Image 3">
   <img src="{{site.baseurl}}/images/IMG_0103.jpg" alt="Image 4">
   <img src="{{site.baseurl}}/images/IMG_7401.jpg" alt="Image 5">
