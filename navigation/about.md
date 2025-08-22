@@ -124,8 +124,8 @@ Me, My Culture, and My Family:
 📷 Pictures! Scroll to the right for more ...
 </comment>
 <div class="image-gallery">
-  <img src="{{site.baseurl}}/images/f3f7f4371513d35805b1360a0439af6a.JPG" alt="Image 1">
-  <img src="{{site.baseurl}}/images/IMG_5289.JPG" alt="Image 2">
+  <img src="/images/f3f7f4371513d35805b1360a0439af6a.JPG" alt="Image 1">
+  <img src="images/IMG_5289.JPG" alt="Image 2">
   <img src="{{site.baseurl}}/images/IMG_5634.JPG" alt="Image 3">
   <img src="{{site.baseurl}}/images/IMG_0103.jpg" alt="Image 4">
   <img src="{{site.baseurl}}/images/IMG_7401.jpg" alt="Image 5">
