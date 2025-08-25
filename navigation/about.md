@@ -7,7 +7,7 @@ comments: true
 
 ## Learn About Me!
 
-Here are some places I have lived.
+Here are some places I have lived
 
 <style>
     /* Style looks pretty compact, 
