@@ -124,7 +124,7 @@ Me, My Culture, and My Family:
 📷 Pictures! Scroll to the right for more ...
 </comment>
 <div class="image-gallery">
-  <img src="{{site.baseurl}}\home\ancheeji\opencs\opencs\student\images\about\images\Promotion_Family.JPG" alt="Image 1">
+  <img src="\\wsl.localhost\Ubuntu-24.04\home\ancheeji\student\images\about\images\Promotion_Family.JPG" alt="Image 1">
   <img src="\\wsl.localhost\Ubuntu-24.04\home\ancheeji\opencs\opencs\student\images\about\images\Promotion_Family.JPG" alt="Image 1">
   <img src="{{site.baseurl}}/images/IMG_5289.JPG" alt="Image 2">
   <img src="{{site.baseurl}}/images/IMG_5634.JPG" alt="Image 3">
