@@ -154,3 +154,61 @@ Learning how to manage files in GitHub Pages is a key skill.  This class will co
 
 
 
+# GitHub Pages Mini Project — Reteach Guide
+
+## 🎯 Goal
+Work with a partner to create an **information site** using GitHub Pages.  
+Your site will include **submenus, styled pages, JavaScript actions, and data tracking**.
+
+---
+
+## 📝 Project Requirements
+1. **Make a submenu** (navigation system).
+2. **Use submenu headings** to organize subtopics.
+3. **Create customized pages** for each submenu.
+4. **Add data** to track information about your topic.
+5. **Include JavaScript actions** on some submenu pages.
+6. **Review GitHub Pages anatomy**:
+   - Use and experiment with **Styles (CSS)**.
+   - Practice **inspecting and debugging**.
+
+---
+
+## 💡 Picking a Topic
+Choose something you’re interested in:
+- 🎮 Gaming Blog → Track mods, communities, guides, etc.
+- 🏋️ Fitness Blog → Track training, nutrition, water, sleep, etc.
+- 🐟 Raising Fish → Care tips, tank data, feeding schedules.
+- 😂 Career Humor → Collect jokes related to careers.
+
+---
+
+## 🧠 Brainstorm → Brainwrite
+**Brainstorm** = share raw ideas with your partner.  
+**Brainwrite** = organize your brainstorm into categories + data.
+
+**Example: Career Humor**
+- Categories (submenu items):  
+  1. Computer Science  
+  2. Accountant  
+  3. Journalism  
+  4. Film and Media  
+  5. Mechanical Engineer  
+  6. Biomedical Engineer  
+  7. Astronomer  
+
+- Data: Jokes written in JavaScript arrays (see below 👇).
+
+---
+
+## 🖥️ JavaScript Example (Computer Science Jokes)
+
+```javascript
+var compsci_joke_list = [
+  { joke: "Why do programmers prefer dark mode? Because light attracts bugs.", complexity: "O(1)" },
+  { joke: "Why did the programmer quit his job? Because he didn't get arrays.", complexity: "O(n)" }
+];
+
+var randomIndex = Math.floor(Math.random() * compsci_joke_list.length);
+var selectedJoke = compsci_joke_list[randomIndex];
+console.log("Joke #" + (randomIndex + 1) + ": " + selectedJoke.joke + " (Complexity: " + selectedJoke.complexity + ")");
