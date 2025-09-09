@@ -83,7 +83,7 @@ permalink: /background
 */
 
     class GameWorld {
-      static gameSpeed = 5;
+      static gameSpeed = 10;
       constructor(backgroundImg, spriteImg) {
         this.canvas = document.getElementById("world");
         this.ctx = this.canvas.getContext('2d');
