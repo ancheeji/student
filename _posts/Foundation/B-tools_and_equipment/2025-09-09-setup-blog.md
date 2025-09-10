@@ -85,7 +85,8 @@ code .
 
 ---
 
-**Hacks Setup and Code Walkthrough**
+## **Hacks Setup and Code Walkthrough**
+
 Now that your tools are ready, let's explore the **Hacks project** 
 
 ---
