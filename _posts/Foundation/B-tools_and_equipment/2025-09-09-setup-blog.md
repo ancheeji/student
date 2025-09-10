@@ -1,7 +1,7 @@
 ---
 title: "How to Set Up Developer Tools with Windows WSL + Hacks"
 description: "Step-by-step blog-style guide for installing WSL, Ubuntu 24.04, development tools, and running project hacks."
-author: "Your Name"
+author: "Michelle Ji"
 date: 2025-09-09
 tags: ["Windows", "WSL", "Ubuntu", "VSCode", "Developer Setup", "Hacks", "JavaScript", "Games"]
 ---
