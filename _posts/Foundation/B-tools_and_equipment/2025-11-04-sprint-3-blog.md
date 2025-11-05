@@ -7,7 +7,7 @@ tags: ["Computer Science", "Reflection", "Digital Famine", "N@tM", "Evaluation"]
 layout: post
 ---
 
-# 🧩 Final Evaluation – Trimester 1–3
+# 🧩 Final Evaluation – Trimester 1
 
 ## 🧠 Introduction
 This trimester has been full of growth, collaboration, and learning opportunities in computer science. Between working through three sprints, building team projects, and presenting at **Night at the Museum (N@tM)**, I’ve learned not only about programming and technology but also about teamwork, problem-solving, and communication.
@@ -26,10 +26,10 @@ Programming-wise, I strengthened my foundation in **JavaScript** and **Python**,
 | **Assignment** | **Points** | **Grade** | **Evidence** |
 |----------------|------------|-----------|---------------|
 | Sprint 1–3 Review Ticket | 3 | **9/10 (90%)** | Completed detailed self-review with reflection on tools mastery, programming skills, and College Board requirements. Included blog documenting personal progress from Sprint 1 through Sprint 3. |
-| Sprint 3 Team Issue(s)/Plan | 2 | **8.5/10 (85%)** | Contributed to Digital Famine’s microblogging, API, and PII module. Helped organize GitHub issues, track progress, and document improvements after feedback. |
-| Beginning-2-End Contribution | 2 | **9/10 (90%)** | Demonstrated individual coding contributions, research, and collaboration. Maintained iterative workflow through commits and pull requests. |
+| Sprint 3 Team Issue(s)/Plan | 2 | **8.5/10 (85%)** | Contributed to Digital Famine’s microblogging module. Helped organize Hints, document improvements after feedback, create footer, organize blogs. |
+| Beginning-2-End Contribution | 2 | **9/10 (90%)** | Demonstrated individual coding contributions and collaboration. Did work outside of class time. Maintained iterative workflow through commits. |
 | N@tM Team Presentation | 2 | **9/10 (90%)** | Presented Digital Famine module to peers and visitors, explained privacy concepts, and received positive audience engagement. |
-| Live Review Indi Demo | 1 | **9/10 (90%)** | Delivered a concise, clear summary of the project, process, and lessons learned during the live review. |
+| Live Review Indi Demo | 1 | **N/A** | N/A |
 | **Total** | **10** | — | **8.9/10 Avg → 89% (A)** |
 
 ---
@@ -39,9 +39,9 @@ Programming-wise, I strengthened my foundation in **JavaScript** and **Python**,
 | **Skill** | **Points** | **Grade** | **Evidence** |
 |------------|------------|-----------|---------------|
 | Work Habits (Analytics) | 1 | **9/10 (90%)** | Regularly completed reflections and self-evaluations; identified areas of improvement using analytics from GitHub and quiz results. |
-| Evidence of Role in Team | 1 | **9/10 (90%)** | Took initiative in writing module content, organizing issues, and linking API research to the main project. |
+| Evidence of Role in Team | 1 | **9/10 (90%)** | Took initiative in acquiring other teams hints, and creating/linking them to our module. Also, organizing blogs and creating footers. |
 | Function / Purpose Design | 1 | **8.5/10 (85%)** | Clearly defined the purpose of the microblogging module; connected data privacy concepts with user education goals. |
-| Live Review | 2 | **9/10 (90%)** | Effectively summarized project scope, process, and takeaways during the live evaluation. |
+| Live Review | 2 | **N/A** | N/A |
 | **Total** | **5** | — | **8.9/10 Avg → 89% (A)** |
 
 ---
@@ -88,10 +88,10 @@ Our Sprint 3 centered on completing and refining the **Digital Famine** project.
 
 ## 💡 Program Function & Purpose
 
-- **Purpose:** To inform players about digital literacy, focusing on the ethics and risks of sharing data online.  
+- **Purpose:** To inform players about how microblogs work, how to surf the internet safely and focusing on the ethics and risks of sharing data online.  
 - **Category:** Educational / Awareness (Social Media and Privacy).  
 - **Inputs:** User navigation clicks and selections.  
-- **Outputs:** Informational paragraphs and visuals about APIs and PII.  
+- **Outputs:** Informational paragraphs and visuals about mircoblogs, APIs, and PII.  
 - **Frontend:** HTML/CSS-based design for layout and readability.  
 - **Backend:** JSON and APIs for connecting data segments (conceptual simulation).
 
@@ -100,25 +100,19 @@ Our Sprint 3 centered on completing and refining the **Digital Famine** project.
 ## 🤝 Beginning-to-End Contribution
 
 - Participated in sprint planning and storyboarding.  
-- Helped research microblogging data usage.  
-- Wrote explanatory content for the module.  
-- Contributed to GitHub Issues and integrated with main project.  
+- Helped work on frontend.  
+- Actively interacted with other groups for hints.  
+- Contributed to GitHub Actions and integrated with main project.  
 - Responded to feedback from peers and improved clarity of information.
 
 ---
 
 ## 🌙 Night at the Museum (N@tM) Reflection
 
-- **Presentation Overview:** Showcased Digital Famine’s microblogging and API module.  
+- **Presentation Overview:** Showcased Digital Famine’s PII and API module.  
 - **Audience Feedback:** Viewers appreciated the educational depth and relevance.  
-- **Q&A:** Guests asked about how APIs collect and share data and how individuals can protect their information.  
-- **Reflections:** The content was strong, but the presentation could have been more interactive. Next time, I’d add quizzes or visuals to improve engagement.
-
----
-
-## 🎤 Live Review Summary
-
-In my live review, I summarized our project’s goal to raise awareness about digital privacy. I discussed how my group collaborated, iterated through sprints, and refined our content based on feedback. I also reflected on the technical and ethical sides of computing, showing how teamwork, research, and problem-solving contributed to our final outcome.
+- **Q&A:** Guests interacted with the MCQ we provided which inform them how individuals can protect their information.  
+- **Reflections:** The content was strong, but the presentation could have been more interactive. Next time, I’d add more quizzes or visuals to improve engagement.
 
 ---
 
