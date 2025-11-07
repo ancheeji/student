@@ -6,294 +6,344 @@ permalink: /pii-game/
 tags: ["Interactive", "Privacy", "PII", "Education", "Cybersecurity"]
 date: 2025-11-06
 ---
-
-<!-- Digital Famine: PII Awareness Drag-and-Drop Game -->
-<section id="pii-game" class="pii-game">
-  <h2>Data Detective — PII Drag & Drop</h2>
-  <p class="lead">Decide what to <strong>Share</strong> and what to <strong>Keep Private</strong>. Drag or tap each card into the right bin, earn points, and learn why each choice matters!</p>
-
-  <div class="game-area">
-    <div class="board">
-      <div id="postArea" class="post-area" aria-live="polite"></div>
-
-      <div class="bins">
-        <div id="keepBin" class="bin keep" data-accept="keep" tabindex="0">
-          <h3>Keep Private</h3>
-          <p class="small">Personal details that identify you</p>
-        </div>
-        <div id="shareBin" class="bin share" data-accept="share" tabindex="0">
-          <h3>Share</h3>
-          <p class="small">Safe public information</p>
-        </div>
-      </div>
-    </div>
-
-    <aside class="controls">
-      <div class="status">
-        <div>Round: <span id="roundNum">1</span>/3</div>
-        <div>Score: <span id="score">0</span></div>
-        <div id="progressWrap"><div id="progressBar"></div></div>
-      </div>
-
-      <div class="actions">
-        <button id="nextBtn">Submit Round</button>
-        <button id="explainBtn">Show Explanations</button>
-        <button id="resetBtn">Reset</button>
-      </div>
-
-      <div id="message" class="message" role="status" aria-live="polite"></div>
-    </aside>
-  </div>
-
-  <div id="explainPanel" class="explain-panel" hidden>
-    <h4>Why These Are Private or Safe</h4>
-    <ul id="explainList"></ul>
-    <button id="closeExplain">Close</button>
-  </div>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Detective — PII Drag & Drop</title>
 
 <style>
-.pii-game { max-width: 1000px; margin: 1rem auto; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; color: #e9eef6; }
-.pii-game h2 { margin-bottom: .25rem; }
-.pii-game .lead { color: #cfd8e3; margin-bottom: .8rem; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #0f172a;
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
 
-.game-area { display: flex; gap: 1rem; align-items: flex-start; }
-.board { flex: 2; display: flex; flex-direction: column; gap: .8rem; }
-.post-area { display: flex; flex-wrap: wrap; gap: .6rem; padding: 12px; border-radius: 10px; background: linear-gradient(180deg,#1d2330,#18202a); min-height: 160px; border: 1px solid rgba(255,255,255,0.04); }
+  h1 {
+    color: #f1f5f9;
+  }
 
-.card {
-  background: linear-gradient(180deg,#2b3444,#212833);
-  border: 1px solid rgba(255,255,255,0.05);
-  padding: 12px;
-  border-radius: 8px;
-  width: 240px;
-  cursor: grab;
-  user-select: none;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
-  color: #f6f8fb;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInCard .4s ease forwards;
-}
-@keyframes fadeInCard {
-  to { opacity: 1; transform: translateY(0); }
-}
-.card:hover { transform: scale(1.03); transition: transform .2s ease; }
-.card:active { cursor: grabbing; }
-.card .label { font-weight: 700; margin-bottom: 6px; display:block; }
-.card .meta { font-size: 13px; color: #c5ccd8; }
+  h1 span {
+    color: #38bdf8;
+  }
 
-.bins { display: flex; gap: .6rem; margin-top: .6rem; }
-.bin {
-  flex: 1;
-  padding: 14px;
-  min-height: 130px;
-  border-radius: 10px;
-  text-align: center;
-  transition: transform .15s ease, box-shadow .15s ease;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.bin.keep { background: linear-gradient(180deg,#3b2a3c,#2c1f2b); }
-.bin.share { background: linear-gradient(180deg,#183b2e,#0f2b20); }
-.bin.drag-over { box-shadow: 0 0 18px rgba(75,211,123,0.3); transform: scale(1.03); }
+  #instructions {
+    text-align: center;
+    max-width: 800px;
+    margin-bottom: 20px;
+  }
 
-.controls { flex: 0 0 300px; display: flex; flex-direction: column; gap: 12px; }
-.status { background: #10131a; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
-#progressWrap { background: rgba(255,255,255,0.04); height: 10px; border-radius: 8px; overflow: hidden; }
-#progressBar { height: 100%; width: 0%; background: linear-gradient(90deg,#4bd37b,#3bc3ff); transition: width .4s ease; }
+  .game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-.actions { display:flex; gap:8px; flex-wrap:wrap; }
-.actions button { padding: 10px 12px; border-radius: 8px; background:#2e86ab; color:white; border:none; cursor:pointer; font-weight:700; transition: transform .1s ease, background .2s; }
-.actions button:hover { transform: translateY(-1px); background:#3499c2; }
-#resetBtn { background:#9b2f2f; }
+  #game-area {
+    background-color: #1e293b;
+    border-radius: 12px;
+    width: 600px;
+    min-height: 200px;
+    margin: 15px 0;
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
 
-.message { padding:10px; border-radius:8px; background: rgba(0,0,0,0.4); color:#e6f0ff; min-height: 44px; }
+  .card {
+    background: #334155;
+    color: white;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 10px;
+    cursor: grab;
+    text-align: center;
+    font-weight: 500;
+    transition: transform 0.2s, background 0.2s;
+  }
 
-.explain-panel { position: fixed; right: 18px; bottom: 18px; width: 360px; max-width: calc(100% - 40px); padding: 14px; border-radius: 12px; background: linear-gradient(180deg,#0f1720,#0b1116); border: 1px solid rgba(255,255,255,0.03); color:#dbe9ff; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 999; }
-.explain-panel h4 { margin-top: 0; }
-.explain-panel ul { margin: 8px 0 12px 16px; }
-.explain-panel button { background:#2e86ab; color:white; padding: 8px 10px; border-radius:6px; border:none; cursor:pointer; }
+  .card:hover {
+    background: #475569;
+    transform: scale(1.08);
+  }
 
-.confetti-piece {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  background: var(--color, #fff);
-  top: 0;
-  left: 50%;
-  opacity: 0.8;
-  border-radius: 50%;
-  animation: confetti-fall 2.6s linear forwards;
-  z-index: 2000;
-}
-@keyframes confetti-fall {
-  to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-}
+  .bins {
+    display: flex;
+    gap: 30px;
+    margin-top: 15px;
+  }
 
-@media (max-width: 860px) {
-  .game-area { flex-direction: column; }
-  .controls { width: 100%; order: 2; }
-}
+  .bin {
+    width: 250px;
+    height: 120px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+
+  #private-bin {
+    background-color: #3b0764;
+  }
+
+  #share-bin {
+    background-color: #064e3b;
+  }
+
+  .bin p {
+    font-size: 0.8em;
+    font-weight: normal;
+  }
+
+  .bin.drag-over {
+    transform: scale(1.05);
+    background-color: #64748b;
+  }
+
+  #stats {
+    background: #0f172a;
+    border: 2px solid #1e293b;
+    border-radius: 12px;
+    padding: 10px 20px;
+    margin: 10px;
+    text-align: left;
+  }
+
+  button {
+    background: #0284c7;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    margin: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+
+  button:hover {
+    background: #0369a1;
+  }
+
+  .reset {
+    background: #dc2626;
+  }
+
+  #explanations {
+    margin-top: 15px;
+    text-align: left;
+    max-width: 600px;
+    background: #111827;
+    padding: 12px 18px;
+    border-radius: 10px;
+    display: none;
+  }
+
+  canvas#confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
 </style>
+</head>
+<body>
+
+<h1><span>Data Detective</span> — PII Drag & Drop</h1>
+<p id="instructions">
+  Decide what to <strong>Share</strong> and what to <strong>Keep Private</strong>.<br>
+  Drag each card into the correct bin to earn points and learn why privacy matters!
+</p>
+
+<div class="game-container">
+  <div id="game-area"></div>
+
+  <div id="stats">
+    <p>Round: <span id="round">1</span>/3</p>
+    <p>Score: <span id="score">0</span></p>
+  </div>
+
+  <div class="bins">
+    <div id="private-bin" class="bin">
+      Keep Private
+      <p>Personal details that identify you</p>
+    </div>
+    <div id="share-bin" class="bin">
+      Share
+      <p>Safe public information</p>
+    </div>
+  </div>
+
+  <div>
+    <button id="submit">Submit Round</button>
+    <button id="show-explanations">Show Explanations</button>
+    <button class="reset" id="reset">Reset</button>
+  </div>
+
+  <div id="explanations"></div>
+</div>
+
+<canvas id="confetti"></canvas>
 
 <script>
-(() => {
-  const rounds = [
-    [
-      { id: 'r1c1', text: "My birthday is July 5th", category: "private", explain: "Birthdate can be used to identify or verify your identity." },
-      { id: 'r1c2', text: "Check out this landscape photo", category: "safe", explain: "A generic photo with no location info is safe." },
-      { id: 'r1c3', text: "Call me at 555-1234", category: "private", explain: "Phone numbers are private contact details." },
-      { id: 'r1c4', text: "I love studying algorithms", category: "safe", explain: "General opinions are safe to share." }
-    ],
-    [
-      { id: 'r2c1', text: "My home address is 221B Pine St.", category: "private", explain: "Home addresses can reveal your physical location." },
-      { id: 'r2c2', text: "Updated my profile pic (no tags)", category: "safe", explain: "Profile photos without metadata are fine." },
-      { id: 'r2c3', text: "Flight confirmation AA123 — 12A seat", category: "private", explain: "Travel details can reveal where you are or will be." },
-      { id: 'r2c4', text: "My favorite coffee spot", category: "safe", explain: "General preferences are okay to share." }
-    ],
-    [
-      { id: 'r3c1', text: "Connected my Google account", category: "private", explain: "Linked accounts can expose personal data." },
-      { id: 'r3c2', text: "Building an app with a weather API", category: "safe", explain: "Project info without secrets is safe." },
-      { id: 'r3c3', text: "My SSN ends with 4321", category: "private", explain: "Government ID numbers must always be private." },
-      { id: 'r3c4', text: "API key: 12345-ABCDE", category: "private", explain: "API keys are secrets that can be exploited." }
-    ]
-  ];
+// Data Cards
+const rounds = [
+  [
+    { text: "Full Name", correct: "private", explanation: "Your full name uniquely identifies you." },
+    { text: "Favorite Color", correct: "share", explanation: "This can't personally identify you." },
+    { text: "Phone Number", correct: "private", explanation: "Can be used to contact or impersonate you." },
+    { text: "School Name", correct: "share", explanation: "Safe to share publicly in most cases." }
+  ],
+  [
+    { text: "Email Address", correct: "private", explanation: "Can be used for scams or spam." },
+    { text: "Pet’s Name", correct: "share", explanation: "Usually safe and not sensitive." },
+    { text: "Home Address", correct: "private", explanation: "Reveals where you live." },
+    { text: "Favorite Subject", correct: "share", explanation: "Public info that’s harmless." }
+  ],
+  [
+    { text: "Social Security Number", correct: "private", explanation: "Highly sensitive personal identifier." },
+    { text: "Hobby", correct: "share", explanation: "Safe to share — part of your personality." },
+    { text: "Birthday", correct: "private", explanation: "Can be used to guess passwords or identity." },
+    { text: "Favorite Food", correct: "share", explanation: "Harmless fun information." }
+  ]
+];
 
-  let round = 0, score = 0, placed = {};
-  const postArea = document.getElementById('postArea'),
-        keepBin = document.getElementById('keepBin'),
-        shareBin = document.getElementById('shareBin'),
-        msg = document.getElementById('message'),
-        scoreEl = document.getElementById('score'),
-        roundNum = document.getElementById('roundNum'),
-        bar = document.getElementById('progressBar'),
-        nextBtn = document.getElementById('nextBtn'),
-        explainPanel = document.getElementById('explainPanel'),
-        explainList = document.getElementById('explainList'),
-        closeExplain = document.getElementById('closeExplain');
+let currentRound = 0;
+let score = 0;
+let dropped = {};
 
-  let selected = null;
+// Load Cards
+function loadRound() {
+  const gameArea = document.getElementById("game-area");
+  gameArea.innerHTML = "";
+  dropped = {};
 
-  const renderRound = () => {
-    postArea.innerHTML = "";
-    placed = {};
-    roundNum.textContent = round + 1;
-    bar.style.width = `${(round / rounds.length) * 100}%`;
-    rounds[round].forEach(c => {
-      const el = document.createElement("div");
-      el.className = "card";
-      el.id = c.id;
-      el.draggable = true;
-      el.innerHTML = `<span class="label">${c.text}</span><span class="meta">drag to a bin</span>`;
-      el.addEventListener("dragstart", e => e.dataTransfer.setData("text/plain", c.id));
-      el.addEventListener("click", () => {
-        if (selected === c.id) {
-          el.style.outline = "";
-          selected = null;
-        } else {
-          if (selected) document.getElementById(selected)?.style?.outline = "";
-          selected = c.id;
-          el.style.outline = "3px solid rgba(75,211,123,0.25)";
-        }
-      });
-      postArea.appendChild(el);
+  rounds[currentRound].forEach((card, index) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.textContent = card.text;
+    div.draggable = true;
+    div.dataset.index = index;
+
+    div.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("index", e.target.dataset.index);
     });
-    msg.textContent = "Drag cards into the correct bins.";
-  };
 
-  [keepBin, shareBin].forEach(bin => {
-    bin.addEventListener("dragover", e => { e.preventDefault(); bin.classList.add("drag-over"); });
-    bin.addEventListener("dragleave", () => bin.classList.remove("drag-over"));
-    bin.addEventListener("drop", e => {
-      e.preventDefault();
-      bin.classList.remove("drag-over");
-      const id = e.dataTransfer.getData("text/plain");
-      if (id) placeCard(id, bin.dataset.accept);
-    });
-    bin.addEventListener("click", () => {
-      if (!selected) { msg.textContent = "Tap a card, then a bin."; return; }
-      placeCard(selected, bin.dataset.accept);
-      document.getElementById(selected).style.outline = "";
-      selected = null;
-    });
+    gameArea.appendChild(div);
   });
 
-  const placeCard = (id, type) => {
-    if (placed[id]) return;
-    const card = document.getElementById(id);
-    if (!card) return;
-    card.remove();
-    placed[id] = type;
-    const clone = card.cloneNode(true);
-    clone.draggable = false;
-    clone.style.cursor = "default";
-    clone.querySelector(".meta").textContent = type === "keep" ? "kept private" : "shared";
-    (type === "keep" ? keepBin : shareBin).appendChild(clone);
-    if (Object.keys(placed).length === rounds[round].length)
-      msg.textContent = "All placed! Click Submit Round.";
-  };
+  document.getElementById("round").textContent = currentRound + 1;
+}
 
-  const confetti = () => {
-    for (let i = 0; i < 80; i++) {
-      const c = document.createElement("div");
-      c.className = "confetti-piece";
-      c.style.setProperty("--color", ["#ffce00", "#4bd37b", "#3bc3ff", "#ff6f61"][Math.floor(Math.random()*4)]);
-      c.style.left = `${Math.random() * 100}%`;
-      c.style.animationDelay = `${Math.random() * 0.3}s`;
-      document.body.appendChild(c);
-      setTimeout(() => c.remove(), 2600);
-    }
-  };
+// Drag & Drop Logic
+["private-bin", "share-bin"].forEach((id) => {
+  const bin = document.getElementById(id);
 
-  const submitRound = () => {
-    const items = rounds[round];
-    let roundScore = 0;
-    explainList.innerHTML = "";
-    items.forEach(c => {
-      const given = placed[c.id];
-      const expected = c.category === "private" ? "keep" : "share";
-      const correct = given === expected;
-      if (correct) roundScore++;
-      const li = document.createElement("li");
-      li.innerHTML = `<strong>${c.text}</strong> — ${c.explain} <em>(expected: ${c.category})</em>`;
-      explainList.appendChild(li);
+  bin.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    bin.classList.add("drag-over");
+  });
+
+  bin.addEventListener("dragleave", () => bin.classList.remove("drag-over"));
+
+  bin.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const index = e.dataTransfer.getData("index");
+    const card = document.querySelector(`.card[data-index='${index}']`);
+    bin.appendChild(card);
+    bin.classList.remove("drag-over");
+    dropped[index] = id.includes("private") ? "private" : "share";
+  });
+});
+
+// Submit Round
+document.getElementById("submit").addEventListener("click", () => {
+  let correct = 0;
+  const round = rounds[currentRound];
+
+  round.forEach((card, index) => {
+    if (dropped[index] === card.correct) correct++;
+  });
+
+  score += correct;
+  document.getElementById("score").textContent = score;
+
+  // Confetti if perfect
+  if (correct === round.length) launchConfetti();
+
+  currentRound++;
+  if (currentRound < rounds.length) loadRound();
+  else {
+    document.getElementById("game-area").innerHTML = "<h3>🏆 All rounds complete! Final Score: " + score + "</h3>";
+  }
+});
+
+// Explanations
+document.getElementById("show-explanations").addEventListener("click", () => {
+  const box = document.getElementById("explanations");
+  const round = rounds[currentRound - 1] || rounds[0];
+  box.innerHTML = "<h3>Explanations:</h3>" + round.map(c => `<p><strong>${c.text}</strong>: ${c.explanation}</p>`).join("");
+  box.style.display = "block";
+});
+
+// Reset
+document.getElementById("reset").addEventListener("click", () => {
+  currentRound = 0;
+  score = 0;
+  document.getElementById("score").textContent = 0;
+  document.getElementById("explanations").style.display = "none";
+  loadRound();
+});
+
+// Confetti Animation
+function launchConfetti() {
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confetti = Array.from({ length: 100 }).map(() => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: Math.random() * 6 + 2,
+    d: Math.random() * 0.5 + 0.5,
+    color: `hsl(${Math.random() * 360}, 100%, 70%)`
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    confetti.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, false);
+      ctx.fillStyle = p.color;
+      ctx.fill();
     });
-    score += roundScore;
-    if (roundScore === items.length) {
-      score++;
-      confetti();
-      msg.textContent = `Perfect! +${items.length + 1} points 🎉`;
-    } else msg.textContent = `Round score: ${roundScore}/${items.length}.`;
-    scoreEl.textContent = score;
-    explainPanel.hidden = false;
-    bar.style.width = `${((round + 1) / rounds.length) * 100}%`;
-  };
+    update();
+  }
 
-  nextBtn.addEventListener("click", () => {
-    if (explainPanel.hidden) submitRound();
-    else {
-      if (round < rounds.length - 1) {
-        round++;
-        keepBin.innerHTML = '<h3>Keep Private</h3><p class="small">Personal details that identify you</p>';
-        shareBin.innerHTML = '<h3>Share</h3><p class="small">Safe public information</p>';
-        explainPanel.hidden = true;
-        renderRound();
-      } else msg.textContent = `Game complete! Final score: ${score}`;
-    }
-  });
+  function update() {
+    confetti.forEach(p => {
+      p.y += p.d * 4;
+      if (p.y > canvas.height) p.y = -10;
+    });
+  }
 
-  document.getElementById("resetBtn").addEventListener("click", () => {
-    round = 0; score = 0;
-    keepBin.innerHTML = '<h3>Keep Private</h3><p class="small">Personal details that identify you</p>';
-    shareBin.innerHTML = '<h3>Share</h3><p class="small">Safe public information</p>';
-    explainPanel.hidden = true;
-    scoreEl.textContent = 0;
-    renderRound();
-    msg.textContent = "Game reset. Ready to play!";
-  });
+  let animation = setInterval(draw, 20);
+  setTimeout(() => clearInterval(animation), 3000);
+}
 
-  closeExplain.addEventListener("click", () => explainPanel.hidden = true);
-
-  renderRound();
-})();
+loadRound();
 </script>
+</body>
+</html>
