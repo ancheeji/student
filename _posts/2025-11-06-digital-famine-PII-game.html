@@ -6,344 +6,336 @@ permalink: /pii-game/
 tags: ["Interactive", "Privacy", "PII", "Education", "Cybersecurity"]
 date: 2025-11-06
 ---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Detective — PII Drag & Drop</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Detective — PII Drag & Drop</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #0d0d0f;
+      color: #f8f8f8;
+      text-align: center;
+      margin: 0;
+      padding: 2rem;
+    }
 
-<style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #0f172a;
-    color: #f8fafc;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+    h1 {
+      color: #00aaff;
+      font-size: 2.5rem;
+    }
 
-  h1 {
-    color: #f1f5f9;
-  }
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
 
-  h1 span {
-    color: #38bdf8;
-  }
+    .info {
+      max-width: 700px;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
 
-  #instructions {
-    text-align: center;
-    max-width: 800px;
-    margin-bottom: 20px;
-  }
+    .card-area {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      background-color: #1a1a20;
+      padding: 20px;
+      border-radius: 15px;
+      width: 80%;
+      min-height: 150px;
+    }
 
-  .game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    .card {
+      background-color: #222;
+      border: 2px solid #555;
+      border-radius: 10px;
+      padding: 10px 15px;
+      cursor: grab;
+      font-weight: bold;
+      color: #fff;
+      width: 180px;
+      transition: transform 0.2s, background-color 0.2s;
+    }
 
-  #game-area {
-    background-color: #1e293b;
-    border-radius: 12px;
-    width: 600px;
-    min-height: 200px;
-    margin: 15px 0;
-    padding: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-  }
+    .card:hover {
+      transform: scale(1.05);
+      background-color: #333;
+    }
 
-  .card {
-    background: #334155;
-    color: white;
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin: 10px;
-    cursor: grab;
-    text-align: center;
-    font-weight: 500;
-    transition: transform 0.2s, background 0.2s;
-  }
+    .bins {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 1.5rem;
+    }
 
-  .card:hover {
-    background: #475569;
-    transform: scale(1.08);
-  }
+    /* ✅ FIXED BIN STYLING */
+    .bin {
+      width: 250px;
+      min-height: 120px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 10px;
+      font-size: 1.2em;
+      font-weight: bold;
+      transition: transform 0.2s, background-color 0.2s;
+    }
 
-  .bins {
-    display: flex;
-    gap: 30px;
-    margin-top: 15px;
-  }
+    .bin .card {
+      margin-top: 8px;
+    }
 
-  .bin {
-    width: 250px;
-    height: 120px;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2em;
-    font-weight: bold;
-    transition: transform 0.2s, background-color 0.2s;
-  }
+    #private-bin {
+      background-color: #2b1a2b;
+      border: 2px solid #a264ff;
+    }
 
-  #private-bin {
-    background-color: #3b0764;
-  }
+    #share-bin {
+      background-color: #0b2b1a;
+      border: 2px solid #4aff8f;
+    }
 
-  #share-bin {
-    background-color: #064e3b;
-  }
+    .bin:hover {
+      transform: scale(1.05);
+    }
 
-  .bin p {
-    font-size: 0.8em;
-    font-weight: normal;
-  }
+    .controls {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-  .bin.drag-over {
-    transform: scale(1.05);
-    background-color: #64748b;
-  }
+    button {
+      background-color: #008cba;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      color: white;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
 
-  #stats {
-    background: #0f172a;
-    border: 2px solid #1e293b;
-    border-radius: 12px;
-    padding: 10px 20px;
-    margin: 10px;
-    text-align: left;
-  }
+    button:hover {
+      background-color: #00aaff;
+    }
 
-  button {
-    background: #0284c7;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 18px;
-    margin: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.2s;
-  }
+    #reset {
+      background-color: #b23b3b;
+    }
 
-  button:hover {
-    background: #0369a1;
-  }
+    #reset:hover {
+      background-color: #d94b4b;
+    }
 
-  .reset {
-    background: #dc2626;
-  }
+    .scoreboard {
+      margin-top: 1rem;
+      background: #121218;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.2rem;
+    }
 
-  #explanations {
-    margin-top: 15px;
-    text-align: left;
-    max-width: 600px;
-    background: #111827;
-    padding: 12px 18px;
-    border-radius: 10px;
-    display: none;
-  }
-
-  canvas#confetti {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-  }
-</style>
+    canvas#confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <canvas id="confetti"></canvas>
+  <div class="game-container">
+    <h1>Data Detective — PII Drag & Drop</h1>
+    <p class="info">
+      Decide what to <strong>Share</strong> and what to <strong>Keep Private</strong>.  
+      Drag or tap each card into the right bin, earn points, and learn why each choice matters!
+    </p>
 
-<h1><span>Data Detective</span> — PII Drag & Drop</h1>
-<p id="instructions">
-  Decide what to <strong>Share</strong> and what to <strong>Keep Private</strong>.<br>
-  Drag each card into the correct bin to earn points and learn why privacy matters!
-</p>
+    <div class="card-area" id="card-area"></div>
 
-<div class="game-container">
-  <div id="game-area"></div>
-
-  <div id="stats">
-    <p>Round: <span id="round">1</span>/3</p>
-    <p>Score: <span id="score">0</span></p>
-  </div>
-
-  <div class="bins">
-    <div id="private-bin" class="bin">
-      Keep Private
-      <p>Personal details that identify you</p>
+    <div class="bins">
+      <div id="private-bin" class="bin" ondrop="drop(event)" ondragover="allowDrop(event)">
+        Keep Private<br /><small>Personal details that identify you</small>
+      </div>
+      <div id="share-bin" class="bin" ondrop="drop(event)" ondragover="allowDrop(event)">
+        Share<br /><small>Safe public information</small>
+      </div>
     </div>
-    <div id="share-bin" class="bin">
-      Share
-      <p>Safe public information</p>
+
+    <div class="scoreboard">
+      Round: <span id="round">1</span>/3 | Score: <span id="score">0</span>
+    </div>
+
+    <div class="controls">
+      <button onclick="submitRound()">Submit Round</button>
+      <button id="show-explanations" onclick="showExplanations()">Show Explanations</button>
+      <button id="reset" onclick="resetGame()">Reset</button>
     </div>
   </div>
 
-  <div>
-    <button id="submit">Submit Round</button>
-    <button id="show-explanations">Show Explanations</button>
-    <button class="reset" id="reset">Reset</button>
-  </div>
+  <script>
+    const cardsData = [
+      { text: "Home address", correct: "private", explanation: "Reveals your exact location — keep private." },
+      { text: "Favorite color", correct: "share", explanation: "Harmless general info — safe to share." },
+      { text: "Social Security number", correct: "private", explanation: "Highly sensitive — never share it." },
+      { text: "School name", correct: "share", explanation: "Generally fine to share in context." },
+      { text: "Credit card number", correct: "private", explanation: "Can be used for theft — keep private." },
+      { text: "Pet’s name", correct: "share", explanation: "Usually fine unless it’s a password hint." },
+      { text: "Email address", correct: "private", explanation: "Can lead to spam or scams — protect it." },
+      { text: "Hobby or interest", correct: "share", explanation: "Safe to share — part of your public profile." }
+    ];
 
-  <div id="explanations"></div>
-</div>
+    let round = 1;
+    let score = 0;
+    let usedCards = [];
 
-<canvas id="confetti"></canvas>
+    function loadRound() {
+      const cardArea = document.getElementById("card-area");
+      cardArea.innerHTML = "";
 
-<script>
-// Data Cards
-const rounds = [
-  [
-    { text: "Full Name", correct: "private", explanation: "Your full name uniquely identifies you." },
-    { text: "Favorite Color", correct: "share", explanation: "This can't personally identify you." },
-    { text: "Phone Number", correct: "private", explanation: "Can be used to contact or impersonate you." },
-    { text: "School Name", correct: "share", explanation: "Safe to share publicly in most cases." }
-  ],
-  [
-    { text: "Email Address", correct: "private", explanation: "Can be used for scams or spam." },
-    { text: "Pet’s Name", correct: "share", explanation: "Usually safe and not sensitive." },
-    { text: "Home Address", correct: "private", explanation: "Reveals where you live." },
-    { text: "Favorite Subject", correct: "share", explanation: "Public info that’s harmless." }
-  ],
-  [
-    { text: "Social Security Number", correct: "private", explanation: "Highly sensitive personal identifier." },
-    { text: "Hobby", correct: "share", explanation: "Safe to share — part of your personality." },
-    { text: "Birthday", correct: "private", explanation: "Can be used to guess passwords or identity." },
-    { text: "Favorite Food", correct: "share", explanation: "Harmless fun information." }
-  ]
-];
+      const newCards = cardsData
+        .filter(c => !usedCards.includes(c.text))
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 4);
 
-let currentRound = 0;
-let score = 0;
-let dropped = {};
+      usedCards.push(...newCards.map(c => c.text));
 
-// Load Cards
-function loadRound() {
-  const gameArea = document.getElementById("game-area");
-  gameArea.innerHTML = "";
-  dropped = {};
+      newCards.forEach(card => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.draggable = true;
+        div.textContent = card.text;
+        div.dataset.correct = card.correct;
+        div.dataset.explanation = card.explanation;
+        div.ondragstart = drag;
+        cardArea.appendChild(div);
+      });
+    }
 
-  rounds[currentRound].forEach((card, index) => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.textContent = card.text;
-    div.draggable = true;
-    div.dataset.index = index;
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
 
-    div.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("index", e.target.dataset.index);
-    });
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.textContent);
+    }
 
-    gameArea.appendChild(div);
-  });
+    function drop(ev) {
+      ev.preventDefault();
+      const text = ev.dataTransfer.getData("text");
+      const card = [...document.querySelectorAll(".card")].find(c => c.textContent === text);
+      if (card) ev.target.appendChild(card);
+    }
 
-  document.getElementById("round").textContent = currentRound + 1;
-}
+    function submitRound() {
+      const privateBin = document.getElementById("private-bin");
+      const shareBin = document.getElementById("share-bin");
 
-// Drag & Drop Logic
-["private-bin", "share-bin"].forEach((id) => {
-  const bin = document.getElementById(id);
+      let roundScore = 0;
 
-  bin.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    bin.classList.add("drag-over");
-  });
+      document.querySelectorAll(".card").forEach(card => {
+        const parentId = card.parentElement.id;
+        if (
+          (parentId === "private-bin" && card.dataset.correct === "private") ||
+          (parentId === "share-bin" && card.dataset.correct === "share")
+        ) {
+          roundScore += 1;
+        }
+      });
 
-  bin.addEventListener("dragleave", () => bin.classList.remove("drag-over"));
+      score += roundScore;
+      document.getElementById("score").textContent = score;
 
-  bin.addEventListener("drop", (e) => {
-    e.preventDefault();
-    const index = e.dataTransfer.getData("index");
-    const card = document.querySelector(`.card[data-index='${index}']`);
-    bin.appendChild(card);
-    bin.classList.remove("drag-over");
-    dropped[index] = id.includes("private") ? "private" : "share";
-  });
-});
+      if (round < 3) {
+        round++;
+        document.getElementById("round").textContent = round;
+        loadRound();
+      } else {
+        launchConfetti();
+        alert(`Game Over! Final Score: ${score}`);
+      }
+    }
 
-// Submit Round
-document.getElementById("submit").addEventListener("click", () => {
-  let correct = 0;
-  const round = rounds[currentRound];
+    function showExplanations() {
+      document.querySelectorAll(".card").forEach(card => {
+        alert(`${card.text}: ${card.dataset.explanation}`);
+      });
+    }
 
-  round.forEach((card, index) => {
-    if (dropped[index] === card.correct) correct++;
-  });
+    function resetGame() {
+      round = 1;
+      score = 0;
+      usedCards = [];
+      document.getElementById("round").textContent = round;
+      document.getElementById("score").textContent = score;
+      document.querySelectorAll("#private-bin, #share-bin").forEach(bin => (bin.innerHTML = bin.innerHTML.split("<br>")[0]));
+      loadRound();
+    }
 
-  score += correct;
-  document.getElementById("score").textContent = score;
+    /* ✅ FIXED CONFETTI FUNCTION */
+    function launchConfetti() {
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.display = "block";
 
-  // Confetti if perfect
-  if (correct === round.length) launchConfetti();
+      const confetti = Array.from({ length: 100 }).map(() => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        r: Math.random() * 6 + 2,
+        d: Math.random() * 0.5 + 0.5,
+        color: `hsl(${Math.random() * 360}, 100%, 70%)`
+      }));
 
-  currentRound++;
-  if (currentRound < rounds.length) loadRound();
-  else {
-    document.getElementById("game-area").innerHTML = "<h3>🏆 All rounds complete! Final Score: " + score + "</h3>";
-  }
-});
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confetti.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, false);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+        update();
+        animationFrame = requestAnimationFrame(draw);
+      }
 
-// Explanations
-document.getElementById("show-explanations").addEventListener("click", () => {
-  const box = document.getElementById("explanations");
-  const round = rounds[currentRound - 1] || rounds[0];
-  box.innerHTML = "<h3>Explanations:</h3>" + round.map(c => `<p><strong>${c.text}</strong>: ${c.explanation}</p>`).join("");
-  box.style.display = "block";
-});
+      function update() {
+        confetti.forEach(p => {
+          p.y += p.d * 4;
+          if (p.y > canvas.height) p.y = -10;
+        });
+      }
 
-// Reset
-document.getElementById("reset").addEventListener("click", () => {
-  currentRound = 0;
-  score = 0;
-  document.getElementById("score").textContent = 0;
-  document.getElementById("explanations").style.display = "none";
-  loadRound();
-});
+      let animationFrame = requestAnimationFrame(draw);
 
-// Confetti Animation
-function launchConfetti() {
-  const canvas = document.getElementById("confetti");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+      setTimeout(() => {
+        cancelAnimationFrame(animationFrame);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = "none";
+      }, 3000);
+    }
 
-  const confetti = Array.from({ length: 100 }).map(() => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height - canvas.height,
-    r: Math.random() * 6 + 2,
-    d: Math.random() * 0.5 + 0.5,
-    color: `hsl(${Math.random() * 360}, 100%, 70%)`
-  }));
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    confetti.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, false);
-      ctx.fillStyle = p.color;
-      ctx.fill();
-    });
-    update();
-  }
-
-  function update() {
-    confetti.forEach(p => {
-      p.y += p.d * 4;
-      if (p.y > canvas.height) p.y = -10;
-    });
-  }
-
-  let animation = setInterval(draw, 20);
-  setTimeout(() => clearInterval(animation), 3000);
-}
-
-loadRound();
-</script>
+    // Load first round
+    loadRound();
+  </script>
 </body>
 </html>
