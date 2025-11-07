@@ -28,16 +28,9 @@ date: 2025-11-06
       font-size: 2.5rem;
     }
 
-    .game-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-
     .info {
       max-width: 700px;
-      margin-bottom: 1rem;
+      margin: 1rem auto;
       font-size: 1.2rem;
     }
 
@@ -75,9 +68,9 @@ date: 2025-11-06
       justify-content: center;
       gap: 3rem;
       margin-top: 1.5rem;
+      flex-wrap: wrap;
     }
 
-    /* ✅ FIXED BIN STYLING */
     .bin {
       width: 250px;
       min-height: 120px;
@@ -149,6 +142,17 @@ date: 2025-11-06
       font-size: 1.2rem;
     }
 
+    #explanation-box {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #181820;
+      border-radius: 10px;
+      width: 60%;
+      margin-left: auto;
+      margin-right: auto;
+      display: none;
+    }
+
     canvas#confetti {
       position: fixed;
       top: 0;
@@ -166,7 +170,7 @@ date: 2025-11-06
     <h1>Data Detective — PII Drag & Drop</h1>
     <p class="info">
       Decide what to <strong>Share</strong> and what to <strong>Keep Private</strong>.  
-      Drag or tap each card into the right bin, earn points, and learn why each choice matters!
+      Drag or tap each card into the right bin, earn points, and click a card to learn why each choice matters!
     </p>
 
     <div class="card-area" id="card-area"></div>
@@ -186,9 +190,10 @@ date: 2025-11-06
 
     <div class="controls">
       <button onclick="submitRound()">Submit Round</button>
-      <button id="show-explanations" onclick="showExplanations()">Show Explanations</button>
       <button id="reset" onclick="resetGame()">Reset</button>
     </div>
+
+    <div id="explanation-box"></div>
   </div>
 
   <script>
@@ -200,7 +205,11 @@ date: 2025-11-06
       { text: "Credit card number", correct: "private", explanation: "Can be used for theft — keep private." },
       { text: "Pet’s name", correct: "share", explanation: "Usually fine unless it’s a password hint." },
       { text: "Email address", correct: "private", explanation: "Can lead to spam or scams — protect it." },
-      { text: "Hobby or interest", correct: "share", explanation: "Safe to share — part of your public profile." }
+      { text: "Hobby or interest", correct: "share", explanation: "Safe to share — part of your public profile." },
+      { text: "Phone number", correct: "private", explanation: "Can be used for scams or spam — protect it." },
+      { text: "Birthday", correct: "private", explanation: "Can help guess passwords or identity info — keep private." },
+      { text: "Graduation year", correct: "share", explanation: "General info — safe to share." },
+      { text: "City you live in", correct: "share", explanation: "Fine to share broadly — not specific enough to identify you." }
     ];
 
     let round = 1;
@@ -226,6 +235,14 @@ date: 2025-11-06
         div.dataset.correct = card.correct;
         div.dataset.explanation = card.explanation;
         div.ondragstart = drag;
+
+        // ✅ Click to show explanation
+        div.addEventListener("click", () => {
+          const box = document.getElementById("explanation-box");
+          box.style.display = "block";
+          box.innerHTML = `<strong>${card.text}</strong>: ${card.explanation}`;
+        });
+
         cardArea.appendChild(div);
       });
     }
@@ -270,14 +287,8 @@ date: 2025-11-06
         loadRound();
       } else {
         launchConfetti();
-        alert(`Game Over! Final Score: ${score}`);
+        setTimeout(() => alert(`🎉 Game Over! Final Score: ${score} / 12`), 500);
       }
-    }
-
-    function showExplanations() {
-      document.querySelectorAll(".card").forEach(card => {
-        alert(`${card.text}: ${card.dataset.explanation}`);
-      });
     }
 
     function resetGame() {
@@ -286,11 +297,12 @@ date: 2025-11-06
       usedCards = [];
       document.getElementById("round").textContent = round;
       document.getElementById("score").textContent = score;
+      document.getElementById("explanation-box").style.display = "none";
       document.querySelectorAll("#private-bin, #share-bin").forEach(bin => (bin.innerHTML = bin.innerHTML.split("<br>")[0]));
       loadRound();
     }
 
-    /* ✅ FIXED CONFETTI FUNCTION */
+    // 🎉 Confetti that disappears after 3s
     function launchConfetti() {
       const canvas = document.getElementById("confetti");
       const ctx = canvas.getContext("2d");
@@ -334,7 +346,6 @@ date: 2025-11-06
       }, 3000);
     }
 
-    // Load first round
     loadRound();
   </script>
 </body>
