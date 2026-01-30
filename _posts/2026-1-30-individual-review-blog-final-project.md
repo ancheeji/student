@@ -1,362 +1,348 @@
 ---
 layout: post
-title: "AI Usage Quest - College Board Create Performance Task"
-description: "Complete College Board Create PT documentation with code examples, algorithms, and testing"
-permalink: /digital-famine/ai/create-pt-blog/
-categories: [CSP, Create-PT, AI-Project]
-tags: [college-board, create-pt, algorithms, lists, procedures, testing, ai-usage]
-author: "[Your Name]"
-date: 2026-01-30
+title: "AI Study Buddy - Prompt Engineering Challenge"
+description: "College Board CPT: Interactive quiz teaching responsible AI usage through prompt engineering"
+permalink: /prompt-challenge-cpt/
+categories: [CPT, Backend, JavaScript]
+tags: [flask, api, procedures, algorithms, lists]
+author: "Your Name"
+date: 2025-01-30
 ---
 
-# AI Usage Quest - College Board Create PT Blog
+## Program Purpose & Function
 
-**Project:** AI Study Buddy - Teaching Responsible AI Usage
+**Purpose**: Educational platform teaching students to craft effective AI prompts through interactive quizzes.
 
----
-
-## Program Purpose and Function
-
-### Purpose
-The **AI Usage Quest** is a web application that teaches high school students how to use AI tools responsibly. It collects student preferences on AI tools (ChatGPT, Claude, Gemini, Copilot) across subjects and facilitates discussions about ethical AI usage.
-
-### Inputs
-- Subject preferences: 5 subjects × 4 AI tools (radio buttons)
-- AI usage status: Yes/No (radio button)
-- Free response: Student thoughts on AI policies (text area)
-- User authentication: Session cookies
-
-### Outputs
-- Bar charts showing AI tool preferences per subject
-- Top 3 recent student thoughts
-- "Sensational Surveyor" badge award
-- Success confirmation message
+**Inputs**: Player name, answer selections, feedback ratings, concept understanding clicks  
+**Outputs**: Score calculations, leaderboard rankings, badge awards, performance analytics
 
 ---
 
-## List Usage - Managing Complexity
+## Backend: Data Abstraction & Procedures
 
-### Code with Lists (Clean)
+### List Usage - Leaderboard Management
+
 ```python
-@survey_api.route('/survey', methods=['POST'])
-def submit_survey():
-    current_user = User.query.filter_by(id=request.cookies.get('user_id')).first()
-    if not current_user:
-        return jsonify({"error": "Authentication required"}), 401
+# FILE: model/prompt_scores.py
+from __init__ import db
+from sqlalchemy import desc
+
+class PromptScore(db.Model):
+    __tablename__ = 'prompt_scores'
     
-    data = request.get_json()
+    id = db.Column(db.Integer, primary_key=True)
+    player_name = db.Column(db.String(100), nullable=False)
+    score = db.Column(db.Integer, nullable=False)
+    correct_answers = db.Column(db.Integer, nullable=False)
+    math_score = db.Column(db.Integer, default=0)
+    science_score = db.Column(db.Integer, default=0)
+    history_score = db.Column(db.Integer, default=0)
+    cs_score = db.Column(db.Integer, default=0)
+    timestamp = db.Column(db.DateTime, nullable=False)
     
-    # LIST INITIALIZATION
-    subjects = ['english', 'math', 'science', 'cs', 'history']
-    ai_tools = ['ChatGPT', 'Claude', 'Gemini', 'Copilot']
-    
-    # Validate with iteration
-    for subject in subjects:
-        if subject not in data or data[subject] not in ai_tools:
-            return jsonify({"error": f"Invalid data for {subject}"}), 400
-    
-    # LIST USAGE - Store responses
-    responses = []
-    for subject in subjects:
-        response_obj = SurveyResponse(
-            user_id=current_user.id,
-            subject=subject,
-            ai_tool=data[subject],
-            uses_ai_schoolwork=data.get('useAI', 'No'),
-            frq_response=data.get('frq', '')
-        )
-        responses.append(response_obj)  # Adding to list
-    
-    # Bulk save
-    db.session.bulk_save_objects(responses)
-    db.session.commit()
-    
-    # Aggregate results
-    aggregated_data = aggregate_survey_results(subjects)
-    
-    return jsonify({"success": True, "data": aggregated_data}), 200
+    @staticmethod
+    def get_leaderboard(limit=10):
+        """LIST: Returns ordered list of top scores"""
+        scores = PromptScore.query.order_by(desc(PromptScore.score)).limit(limit).all()
+        return [score.read() for score in scores]  # List comprehension
 ```
 
-### Without Lists (Repetitive - 100+ lines)
-```python
-# BAD APPROACH - Must repeat for each subject
-english_response = SurveyResponse(user_id=user_id, subject='english', ai_tool=data['english'])
-math_response = SurveyResponse(user_id=user_id, subject='math', ai_tool=data['math'])
-science_response = SurveyResponse(user_id=user_id, subject='science', ai_tool=data['science'])
-cs_response = SurveyResponse(user_id=user_id, subject='cs', ai_tool=data['cs'])
-history_response = SurveyResponse(user_id=user_id, subject='history', ai_tool=data['history'])
-
-db.session.add(english_response)
-db.session.add(math_response)
-# ... 3 more adds
-
-# Aggregation needs 20+ variables
-english_chatgpt = 0
-english_claude = 0
-# ... 18 more variables!
-```
-
-**Lists manage complexity by:**
-- Single loop handles all 5 subjects
-- Easy to add new subjects
-- Bulk operations instead of 5 commits
-- No hard-coded variables
+**Why lists matter**: Without this list, we'd need 10 separate variables and database queries. The list enables dynamic sorting, iteration, and flexible limit parameters.
 
 ---
 
-## Procedures and Algorithms
+### Procedure with Algorithm (Sequence, Selection, Iteration)
 
-### Main Procedure with Parameters
 ```python
-def aggregate_survey_results(subjects):
+# FILE: prompt_game_api.py
+
+def calculate_performance_metrics(subject_scores, subject_counts):
     """
-    PURPOSE: Count AI tool preferences for each subject
-    PARAMETER: subjects - list of subject names to process
-    RETURNS: Dictionary with counts per tool per subject
-    
-    ALGORITHM: Sequence + Selection + Iteration
+    PARAMETERS:
+        - subject_scores: dict of correct answers per subject
+        - subject_counts: dict of total questions attempted
+    RETURNS: Performance analysis with weak area recommendations
     """
-    result = {}
-    ai_tools = ['ChatGPT', 'Claude', 'Gemini', 'Copilot']
     
-    # ITERATION - Process each subject
+    # INITIALIZATION (List)
+    subjects = ['math', 'science', 'history', 'cs']
+    performance = {}
+    weak_areas = []  # List to track subjects needing improvement
+    
+    # ITERATION: Process each subject
     for subject in subjects:
-        # Initialize counters
-        tool_counts = {tool: 0 for tool in ai_tools}
+        total = subject_counts.get(subject, 0)
+        correct = subject_scores.get(subject, 0)
         
-        # Query database
-        responses = SurveyResponse.query.filter_by(subject=subject).all()
-        
-        # NESTED ITERATION - Count each response
-        for response in responses:
-            # SELECTION - Validate tool
-            if response.ai_tool in tool_counts:
-                tool_counts[response.ai_tool] += 1  # Accumulation
-        
-        result[subject] = tool_counts
+        # SELECTION: Check if attempted (Boolean: total > 0)
+        if total > 0:
+            # SEQUENCE: Calculate percentage
+            percentage = (correct / total) * 100
+            performance[subject] = {
+                'correct': correct,
+                'total': total,
+                'percentage': round(percentage, 2)
+            }
+            
+            # NESTED SELECTION: Identify weak areas
+            if percentage < 50:
+                weak_areas.append({
+                    'subject': subject,
+                    'percentage': percentage,
+                    'recommendation': f"Review {subject} strategies"
+                })
+        else:
+            performance[subject] = {'correct': 0, 'total': 0, 'percentage': 0}
     
-    # Add statistics
-    result['useAI'] = get_ai_usage_stats()
-    result['frqs'] = get_recent_frqs()
+    # SEQUENCE: Sort by lowest percentage
+    weak_areas.sort(key=lambda x: x['percentage'])
     
-    return result
+    return {'performance': performance, 'weak_areas': weak_areas}
+```
 
+---
 
-def get_recent_frqs():
-    """Retrieves top 3 recent FRQ responses"""
-    all_responses = SurveyResponse.query\
-        .order_by(SurveyResponse.timestamp.desc())\
-        .limit(10)\
-        .all()
+## Frontend: JavaScript Procedure Calls
+
+### Procedure 1: Submit Score to Backend
+
+```javascript
+// FILE: frontend submodule_3 HTML (embedded JavaScript)
+
+async function endGame() {
+    showScreen('resultsScreen');
     
-    # LIST COMPREHENSION with filtering
-    frq_list = [
-        {
-            'text': response.frq_response,
-            'timestamp': response.timestamp.isoformat(),
-            'user_id': response.user.username if response.user else 'anonymous'
+    // Calculate totals using iteration
+    const correctCount = subjectScores.math + subjectScores.science + 
+                        subjectScores.history + subjectScores.cs;
+    
+    // PROCEDURE CALL: Send data to backend API
+    await submitScoreToBackend(playerName, score, correctCount, subjectScores);
+    
+    // Load updated leaderboard
+    await updatePersistentLeaderboard();
+}
+
+// PROCEDURE with PARAMETERS
+async function submitScoreToBackend(name, totalScore, correct, subjects) {
+    try {
+        const response = await fetch(`${API_URL}/scores`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playerName: name,           // INPUT
+                score: totalScore,          // INPUT
+                correctAnswers: correct,    // INPUT
+                subjectScores: subjects,    // INPUT (dict)
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        const result = await response.json();  // OUTPUT
+        
+        // SELECTION: Check if badge awarded
+        if (result.badge_awarded === true) {
+            handleBadgeAward(result);  // PROCEDURE CALL
         }
-        for response in all_responses
-        if response.frq_response and len(response.frq_response.strip()) > 0
-    ]
-    
-    return frq_list[:3]  # LIST SLICING
-
-
-def get_ai_usage_stats():
-    """Calculates AI usage statistics"""
-    all_responses = SurveyResponse.query.all()
-    
-    # LIST FILTERING
-    yes_responses = [r for r in all_responses if r.uses_ai_schoolwork == 'Yes']
-    no_responses = [r for r in all_responses if r.uses_ai_schoolwork == 'No']
-    
-    return {'Yes': len(yes_responses), 'No': len(no_responses)}
+        
+        return result;
+    } catch (error) {
+        console.error('Score submission failed:', error);
+        return null;
+    }
+}
 ```
 
-**Algorithm Components:**
-- **Sequence**: Steps execute in order (init → query → count → store)
-- **Selection**: if-statement validates AI tool
-- **Iteration**: Nested loops process subjects and responses
+### Procedure 2: Load and Display Leaderboard
+
+```javascript
+// PROCEDURE: Fetch leaderboard (no parameters)
+async function updatePersistentLeaderboard() {
+    try {
+        const response = await fetch(`${API_URL}/leaderboard`);
+        
+        // SELECTION: Validate response
+        if (!response.ok) return;
+
+        const data = await response.json();
+        
+        // SELECTION: Check if data exists
+        if (data.success && data.leaderboard) {
+            const tbody = document.getElementById('persistentLeaderboardBody');
+            tbody.innerHTML = '';
+
+            // ITERATION: Loop through list (0-9 for top 10)
+            for (let i = 0; i < 10; i++) {
+                const entry = data.leaderboard[i];  // LIST ACCESS
+                const tr = document.createElement('tr');
+
+                // NESTED SELECTION: Determine rank styling
+                let rankHtml = '';
+                if (i === 0) {
+                    rankHtml = `<td class="rank-cell rank-1"><span class="medal">🥇</span> 1</td>`;
+                } else if (i === 1) {
+                    rankHtml = `<td class="rank-cell rank-2"><span class="medal">🥈</span> 2</td>`;
+                } else if (i === 2) {
+                    rankHtml = `<td class="rank-cell rank-3"><span class="medal">🥉</span> 3</td>`;
+                } else {
+                    rankHtml = `<td class="rank-cell">${i + 1}</td>`;
+                }
+
+                // SELECTION: Check if entry exists at this position
+                if (entry) {
+                    tr.innerHTML = `
+                        ${rankHtml}
+                        <td class="name-cell">${entry.playerName || '-'}</td>
+                        <td class="score-cell">${entry.score || '-'}</td>
+                    `;
+                } else {
+                    tr.innerHTML = `${rankHtml}<td>-</td><td>-</td>`;
+                }
+                
+                tbody.appendChild(tr);
+            }
+        }
+    } catch (error) {
+        console.error('Leaderboard update failed:', error);
+    }
+}
+```
+
+### Procedure 3: Load AI Concepts (Check for Understanding)
+
+```javascript
+// PROCEDURE with PARAMETER
+async function loadConceptsData() {
+    const conceptsContainer = document.getElementById("conceptsResultModal");
+    
+    try {
+        const response = await fetch(`${pythonURI}/api/jokes/`, fetchOptions);
+        
+        // SELECTION: Validate response
+        if (response.status !== 200) {
+            displayError('Failed to load concepts');
+            return;
+        }
+        
+        const data = await response.json();  // OUTPUT: List of concepts
+        conceptsContainer.innerHTML = '';
+
+        // ITERATION: Process each concept in list
+        for (const row of data) {
+            const tr = document.createElement("tr");
+
+            // Create concept text cell
+            const concept = document.createElement("td");
+            concept.innerHTML = row.id + ". " + row.joke;
+
+            // Create "Got It" button with click handler
+            const gotIt = document.createElement("td");
+            const gotItBtn = document.createElement('button');
+            gotItBtn.id = 'haha' + row.id;
+            gotItBtn.innerHTML = row.haha;  // Display count
+            gotItBtn.onclick = function () {
+                // PROCEDURE CALL with parameters
+                conceptReaction('haha', `${pythonURI}/api/jokes/like/${row.id}`, gotItBtn.id);
+            };
+            gotIt.appendChild(gotItBtn);
+
+            // Create "Need Help" button
+            const needHelp = document.createElement("td");
+            const needHelpBtn = document.createElement('button');
+            needHelpBtn.id = 'boohoo' + row.id;
+            needHelpBtn.innerHTML = row.boohoo;
+            needHelpBtn.onclick = function () {
+                conceptReaction('boohoo', `${pythonURI}/api/jokes/jeer/${row.id}`, needHelpBtn.id);
+            };
+            needHelp.appendChild(needHelpBtn);
+
+            tr.appendChild(concept);
+            tr.appendChild(gotIt);
+            tr.appendChild(needHelp);
+            conceptsContainer.appendChild(tr);
+        }
+    } catch (err) {
+        displayError(err);
+    }
+}
+
+// PROCEDURE: Update concept reaction count
+function conceptReaction(type, postURL, elemID) {
+    const options = {
+        ...fetchOptions,
+        method: 'PUT',  // Update existing data
+    };
+
+    fetch(postURL, options)
+        .then(response => response.json())
+        .then(data => {
+            // SELECTION: Update correct counter based on type
+            if (type === 'haha') {
+                document.getElementById(elemID).innerHTML = data.haha;
+            } else if (type === 'boohoo') {
+                document.getElementById(elemID).innerHTML = data.boohoo;
+            }
+        })
+        .catch(err => console.error(err));
+}
+```
 
 ---
 
-## Testing and Debugging
+## Testing & Debugging
 
-### Test Case 1: Valid Submission
-```python
-# Postman Request
-POST http://localhost:8887/api/survey
-Content-Type: application/json
-Cookie: user_id=student_042
+### Test Case: Different Procedure Calls
 
-{
-  "english": "Claude",
-  "math": "ChatGPT",
-  "science": "Gemini",
-  "cs": "Copilot",
-  "history": "Claude",
-  "useAI": "Yes",
-  "frq": "I believe AI should be used as a learning aid, not a replacement."
+```javascript
+// CALL 1: High score submission
+await submitScoreToBackend("Alice", 850, 10, {
+    math: 3, science: 3, history: 2, cs: 2
+});
+// Executes: Success path, badge check triggers
+
+// CALL 2: Low score submission  
+await submitScoreToBackend("Bob", 250, 4, {
+    math: 1, science: 0, history: 2, cs: 1
+});
+// Executes: Success path, different badge logic, shows weak areas
+```
+
+### Bug Fixed: Leaderboard Race Condition
+
+**Original Error**:
+```javascript
+// ❌ Bug: Called before data loaded
+async function endGame() {
+    updatePersistentLeaderboard();  // Async but not awaited!
+    loadLeaderboard();  // Uses stale data
 }
+```
 
-# Expected Response
-{
-  "success": true,
-  "data": {
-    "english": {"ChatGPT": 8, "Claude": 15, "Gemini": 5, "Copilot": 3},
-    "useAI": {"Yes": 28, "No": 3},
-    "frqs": [...]
-  }
+**Fix**:
+```javascript
+// ✅ Fixed: Proper async/await sequencing
+async function endGame() {
+    await submitScoreToBackend(...);
+    await updatePersistentLeaderboard();  // Wait for backend
+    loadLeaderboard();  // Now has fresh data
 }
 ```
-
-### Bug Fix: Empty FRQ Responses
-
-**Original (Buggy):**
-```python
-def get_recent_frqs():
-    all_responses = SurveyResponse.query.limit(10).all()
-    
-    # BUG: Returns empty FRQs
-    frq_list = [
-        {'text': response.frq_response, ...}
-        for response in all_responses
-    ]
-    return frq_list[:3]
-```
-
-**Problem:** Frontend displayed blank cards for empty responses
-
-**Fixed:**
-```python
-def get_recent_frqs():
-    all_responses = SurveyResponse.query.limit(10).all()
-    
-    # FIX: Filter out empty responses
-    frq_list = [
-        {'text': response.frq_response, ...}
-        for response in all_responses
-        if response.frq_response and len(response.frq_response.strip()) > 0
-    ]
-    return frq_list[:3]
-```
-
-**Result:** Only displays FRQs with actual content
 
 ---
 
 ## PPR Questions
 
-### 1. Procedure & Selection
-**Q: Identify the first if-statement and explain what happens if it evaluates to false.**
+**Procedure**: `submitScoreToBackend(name, totalScore, correct, subjects)`  
+**Call**: `await submitScoreToBackend(playerName, score, correctCount, subjectScores)`  
+**List Init**: `const tbody = document.getElementById('persistentLeaderboardBody')`  
+**List Use**: `for (let i = 0; i < 10; i++) { const entry = data.leaderboard[i]; }`
 
-**A:** First conditional: `if not current_user:`
-
-**If False** (user exists): Program continues, validates data, processes survey  
-**If True** (user not found): Returns 401 error, no database changes
-
-### 2. Procedural Abstraction
-**Q: Identify parameters and explain how they manage complexity.**
-
-**A:** Parameter: `subjects` in `aggregate_survey_results(subjects)`
-
-**Manages complexity by:**
-- Works with ANY list of subjects (not hard-coded)
-- Reusable for different scenarios:
-  ```python
-  aggregate_survey_results(['english', 'math'])  # Core only
-  aggregate_survey_results(['english', 'math', 'science', 'cs', 'history'])  # All
-  ```
-- No need for separate functions per subject
-
-### 3. Procedure Calls
-**Q: Write two different procedure calls.**
-
-**A:**
-```python
-# Call 1: All subjects (5 iterations)
-all_subjects = ['english', 'math', 'science', 'cs', 'history']
-full_data = aggregate_survey_results(all_subjects)
-
-# Call 2: Core only (3 iterations)
-core_subjects = ['english', 'math', 'science']
-core_data = aggregate_survey_results(core_subjects)
-```
-
-Different execution: Call 1 does 5 database queries, Call 2 does 3
-
-### 4. Logic Error
-**Q: Describe a modification that causes a logic error.**
-
-**A:** Moving `.limit(3)` before filtering:
-
-```python
-# BUGGY: Limit BEFORE filter
-def get_recent_frqs():
-    all_responses = SurveyResponse.query.limit(3).all()  # Gets first 3
-    frq_list = [... for r in all_responses if r.frq_response]  # Filters
-    return frq_list
-
-# If first 2 are empty, returns only 1 FRQ instead of 3!
-```
-
-**Impact:** Frontend expects 3 responses but might get 0-3 depending on empty entries
-
-### 5. List Utilization
-**Q: Explain how code uses a list.**
-
-**A:** Lists used for:
-- **Adding**: `responses.append(response_obj)`
-- **Accessing**: `frq_list[0]` (first FRQ)
-- **Traversing**: `for response in all_responses`
-- **Slicing**: `frq_list[:3]` (top 3)
-
-Without lists: Would need 50+ separate variables for FRQs
-
-### 6. Algorithm Analysis
-**Q: Describe the algorithm in your iteration.**
-
-**A:** `aggregate_survey_results()` algorithm:
-
-**Input:** `['english', 'math']`  
-**Database:** English has [Claude, Claude, ChatGPT], Math has [ChatGPT, ChatGPT, Claude]
-
-**Execution:**
-```
-Iteration 1: subject='english'
-  - Initialize: {'ChatGPT': 0, 'Claude': 0, 'Gemini': 0, 'Copilot': 0}
-  - Process responses: Claude→1, Claude→2, ChatGPT→1
-  - Result: {'ChatGPT': 1, 'Claude': 2, 'Gemini': 0, 'Copilot': 0}
-
-Iteration 2: subject='math'
-  - Initialize: {'ChatGPT': 0, 'Claude': 0, 'Gemini': 0, 'Copilot': 0}
-  - Process responses: ChatGPT→1, ChatGPT→2, Claude→1
-  - Result: {'ChatGPT': 2, 'Claude': 1, 'Gemini': 0, 'Copilot': 0}
-```
+**Boolean Expression**: `if (data.success && data.leaderboard)` checks both success flag AND list existence  
+**If False**: Function returns early, preventing errors from accessing undefined data
 
 ---
 
-## Database Schema
+## Conclusion
 
-```sql
-CREATE TABLE survey_responses (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    subject VARCHAR(50) NOT NULL,
-    ai_tool VARCHAR(50) NOT NULL,
-    uses_ai_schoolwork VARCHAR(10),
-    frq_response TEXT,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
----
-
-## Summary
-
-✅ **Lists** manage complexity (subjects, responses, frq_list)  
-✅ **Procedures** with parameters (aggregate_survey_results)  
-✅ **Algorithm** uses sequence, selection, iteration  
-✅ **Testing** includes bug fixes with before/after code  
-✅ **No hard-coded data** - all dynamic database queries
+This program demonstrates procedural abstraction through reusable API calls, manages complexity with lists for leaderboard data, and implements algorithms with proper sequencing, selection (conditionals), and iteration (loops).
