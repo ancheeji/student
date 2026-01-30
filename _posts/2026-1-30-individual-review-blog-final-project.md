@@ -2,7 +2,7 @@
 layout: post
 title: "AI Study Buddy - Prompt Engineering Challenge"
 description: "College Board CPT: Interactive quiz teaching responsible AI usage through prompt engineering"
-permalink: /prompt-challenge-cpt/
+permalink: /skill-b-submodule-3/
 categories: [CPT, Backend, JavaScript]
 tags: [flask, api, procedures, algorithms, lists]
 author: "Your Name"
@@ -11,43 +11,53 @@ date: 2025-01-30
 
 ## Program Purpose & Function
 
-**Purpose**: Educational platform teaching students to craft effective AI prompts through interactive quizzes.
+**Purpose**: Educational platform teaching students to craft effective AI prompts through interactive quizzes with performance tracking and concept understanding.
 
-**Inputs**: Player name, answer selections, feedback ratings, concept understanding clicks  
-**Outputs**: Score calculations, leaderboard rankings, badge awards, performance analytics
+**Inputs**: Player name, answer selections, time remaining, feedback ratings, concept understanding clicks  
+**Outputs**: Score calculations, performance analytics, badge awards, concept tracking data
 
 ---
 
 ## Backend: Data Abstraction & Procedures
 
-### List Usage - Leaderboard Management
+### List Usage - Question Bank Management
 
 ```python
-# FILE: model/prompt_scores.py
+# FILE: model/prompt_questions.py
 from __init__ import db
-from sqlalchemy import desc
 
-class PromptScore(db.Model):
-    __tablename__ = 'prompt_scores'
+class PromptQuestion(db.Model):
+    __tablename__ = 'prompt_questions'
     
     id = db.Column(db.Integer, primary_key=True)
-    player_name = db.Column(db.String(100), nullable=False)
-    score = db.Column(db.Integer, nullable=False)
-    correct_answers = db.Column(db.Integer, nullable=False)
-    math_score = db.Column(db.Integer, default=0)
-    science_score = db.Column(db.Integer, default=0)
-    history_score = db.Column(db.Integer, default=0)
-    cs_score = db.Column(db.Integer, default=0)
-    timestamp = db.Column(db.DateTime, nullable=False)
+    subject = db.Column(db.String(50), nullable=False)
+    scenario = db.Column(db.Text, nullable=False)
+    question_data = db.Column(db.JSON, nullable=False)  # Stores options list
+    correct_answer = db.Column(db.Integer, nullable=False)
+    explanation = db.Column(db.Text)
     
     @staticmethod
-    def get_leaderboard(limit=10):
-        """LIST: Returns ordered list of top scores"""
-        scores = PromptScore.query.order_by(desc(PromptScore.score)).limit(limit).all()
-        return [score.read() for score in scores]  # List comprehension
+    def get_questions_by_subject(subject_filter=None):
+        """LIST: Returns filtered list of questions"""
+        if subject_filter:
+            questions = PromptQuestion.query.filter_by(subject=subject_filter).all()
+        else:
+            questions = PromptQuestion.query.all()
+        
+        return [q.to_dict() for q in questions]  # List comprehension
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'subject': self.subject,
+            'scenario': self.scenario,
+            'options': self.question_data.get('options', []),
+            'correctAnswer': self.correct_answer,
+            'explanation': self.explanation
+        }
 ```
 
-**Why lists matter**: Without this list, we'd need 10 separate variables and database queries. The list enables dynamic sorting, iteration, and flexible limit parameters.
+**Why lists matter**: Without this list, we'd need separate queries for each question type. The list enables dynamic filtering, shuffling, and flexible question selection across subjects.
 
 ---
 
@@ -104,115 +114,167 @@ def calculate_performance_metrics(subject_scores, subject_counts):
 
 ## Frontend: JavaScript Procedure Calls
 
-### Procedure 1: Submit Score to Backend
+### Procedure 1: Load Questions from Backend
 
 ```javascript
 // FILE: frontend submodule_3 HTML (embedded JavaScript)
 
-async function endGame() {
-    showScreen('resultsScreen');
-    
-    // Calculate totals using iteration
-    const correctCount = subjectScores.math + subjectScores.science + 
-                        subjectScores.history + subjectScores.cs;
-    
-    // PROCEDURE CALL: Send data to backend API
-    await submitScoreToBackend(playerName, score, correctCount, subjectScores);
-    
-    // Load updated leaderboard
-    await updatePersistentLeaderboard();
-}
+let allQuestions = [];  // LIST INITIALIZATION
+let gameQuestions = [];
+let currentQuestionIndex = 0;
 
-// PROCEDURE with PARAMETERS
-async function submitScoreToBackend(name, totalScore, correct, subjects) {
+// PROCEDURE with no parameters
+async function loadQuestionsFromBackend() {
     try {
-        const response = await fetch(`${API_URL}/scores`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                playerName: name,           // INPUT
-                score: totalScore,          // INPUT
-                correctAnswers: correct,    // INPUT
-                subjectScores: subjects,    // INPUT (dict)
-                timestamp: new Date().toISOString()
-            })
-        });
-
-        const result = await response.json();  // OUTPUT
-        
-        // SELECTION: Check if badge awarded
-        if (result.badge_awarded === true) {
-            handleBadgeAward(result);  // PROCEDURE CALL
-        }
-        
-        return result;
-    } catch (error) {
-        console.error('Score submission failed:', error);
-        return null;
-    }
-}
-```
-
-### Procedure 2: Load and Display Leaderboard
-
-```javascript
-// PROCEDURE: Fetch leaderboard (no parameters)
-async function updatePersistentLeaderboard() {
-    try {
-        const response = await fetch(`${API_URL}/leaderboard`);
+        const response = await fetch(`${API_URL}/questions`);
         
         // SELECTION: Validate response
-        if (!response.ok) return;
-
-        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();  // OUTPUT
         
         // SELECTION: Check if data exists
-        if (data.success && data.leaderboard) {
-            const tbody = document.getElementById('persistentLeaderboardBody');
-            tbody.innerHTML = '';
-
-            // ITERATION: Loop through list (0-9 for top 10)
-            for (let i = 0; i < 10; i++) {
-                const entry = data.leaderboard[i];  // LIST ACCESS
-                const tr = document.createElement('tr');
-
-                // NESTED SELECTION: Determine rank styling
-                let rankHtml = '';
-                if (i === 0) {
-                    rankHtml = `<td class="rank-cell rank-1"><span class="medal">🥇</span> 1</td>`;
-                } else if (i === 1) {
-                    rankHtml = `<td class="rank-cell rank-2"><span class="medal">🥈</span> 2</td>`;
-                } else if (i === 2) {
-                    rankHtml = `<td class="rank-cell rank-3"><span class="medal">🥉</span> 3</td>`;
-                } else {
-                    rankHtml = `<td class="rank-cell">${i + 1}</td>`;
-                }
-
-                // SELECTION: Check if entry exists at this position
-                if (entry) {
-                    tr.innerHTML = `
-                        ${rankHtml}
-                        <td class="name-cell">${entry.playerName || '-'}</td>
-                        <td class="score-cell">${entry.score || '-'}</td>
-                    `;
-                } else {
-                    tr.innerHTML = `${rankHtml}<td>-</td><td>-</td>`;
-                }
-                
-                tbody.appendChild(tr);
-            }
+        if (data.success && data.questions) {
+            allQuestions = data.questions;  // LIST ASSIGNMENT
+            return true;
+        } else {
+            throw new Error('Invalid response format');
         }
     } catch (error) {
-        console.error('Leaderboard update failed:', error);
+        console.error('Error loading questions:', error);
+        alert('Failed to load questions from server.');
+        return false;
     }
+}
+
+// PROCEDURE CALL in game start
+async function startGame() {
+    playerName = document.getElementById('playerName').value.trim();
+    
+    // SELECTION: Validate input
+    if (!playerName) {
+        alert('Please enter your name!');
+        return;
+    }
+
+    // SELECTION: Check if questions loaded
+    if (allQuestions.length === 0) {
+        const loaded = await loadQuestionsFromBackend();  // PROCEDURE CALL
+        if (!loaded) return;
+    }
+
+    gameQuestions = shuffleArray(allQuestions);  // PROCEDURE CALL with parameter
+    loadQuestion();  // PROCEDURE CALL
 }
 ```
 
-### Procedure 3: Load AI Concepts (Check for Understanding)
+### Procedure 2: Shuffle and Display Questions
 
 ```javascript
-// PROCEDURE with PARAMETER
+// PROCEDURE with PARAMETER (list)
+function shuffleArray(array) {
+    const newArray = [...array];  // Create copy of list
+    
+    // ITERATION: Fisher-Yates shuffle algorithm
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        
+        // SEQUENCE: Swap elements
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    
+    return newArray;  // OUTPUT: Shuffled list
+}
+
+// PROCEDURE: Display current question
+function loadQuestion() {
+    const question = gameQuestions[currentQuestionIndex];  // LIST ACCESS
+    selectedAnswer = null;
+    questionStartTime = Date.now();
+
+    // Update display
+    document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+    document.getElementById('scenario').textContent = question.scenario;
+
+    // PROCEDURE CALL with parameter (list)
+    const shuffledOptions = shuffleArray(question.options);
+    
+    // ITERATION: Create HTML for each option in list
+    const optionsHtml = shuffledOptions.map((option, index) => `
+        <div class="prompt-option" onclick="selectAnswer(${index})">
+            <div class="prompt-option-label">Option ${String.fromCharCode(65 + index)}</div>
+            <div class="prompt-text">${option.text}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('promptOptions').innerHTML = optionsHtml;
+    window.currentOptions = shuffledOptions;  // Store for validation
+    
+    startTimer();  // PROCEDURE CALL
+}
+```
+
+### Procedure 3: Calculate Score with Time Bonus
+
+```javascript
+// PROCEDURE with PARAMETERS
+function checkAnswer(optionIndex) {
+    clearInterval(timerInterval);
+
+    const question = gameQuestions[currentQuestionIndex];  // LIST ACCESS
+    const selectedOption = optionIndex >= 0 ? window.currentOptions[optionIndex] : null;
+    const isCorrect = selectedOption && selectedOption.isCorrect;
+
+    let pointsEarned = 0;
+    
+    // SELECTION: Calculate points if correct
+    if (isCorrect) {
+        // SEQUENCE: Base points + time bonus
+        const timeBonus = Math.floor(timeLeft / 3);
+        pointsEarned = 100 + timeBonus;
+        score += pointsEarned;
+
+        subjectScores[question.subject]++;  // Update subject tracking
+    }
+    
+    subjectCounts[question.subject]++;  // Increment total
+
+    // Update display
+    document.getElementById('currentScore').textContent = score;
+
+    // PROCEDURE CALL with parameter
+    displayFeedback(isCorrect, pointsEarned, selectedOption);
+}
+
+// PROCEDURE: Display feedback to user
+function displayFeedback(correct, points, option) {
+    const feedback = document.getElementById('feedback');
+    
+    // SELECTION: Show different messages based on correctness
+    if (correct) {
+        feedback.className = 'feedback correct show';
+        feedback.innerHTML = `
+            <strong>✓ Correct! (+${points} points)</strong><br>
+            ${option.explanation}
+        `;
+    } else {
+        feedback.className = 'feedback incorrect show';
+        feedback.innerHTML = `
+            <strong>✗ Incorrect</strong><br>
+            ${option ? option.explanation : 'Time\'s up!'}
+        `;
+    }
+
+    document.getElementById('nextBtn').style.display = 'inline-block';
+}
+```
+
+### Procedure 4: Load AI Concepts (Check for Understanding)
+
+```javascript
+// PROCEDURE: Fetch and display concepts list
 async function loadConceptsData() {
     const conceptsContainer = document.getElementById("conceptsResultModal");
     
@@ -267,11 +329,11 @@ async function loadConceptsData() {
     }
 }
 
-// PROCEDURE: Update concept reaction count
+// PROCEDURE with PARAMETERS: Update concept reaction count
 function conceptReaction(type, postURL, elemID) {
     const options = {
         ...fetchOptions,
-        method: 'PUT',  // Update existing data
+        method: 'PUT',
     };
 
     fetch(postURL, options)
@@ -295,37 +357,41 @@ function conceptReaction(type, postURL, elemID) {
 ### Test Case: Different Procedure Calls
 
 ```javascript
-// CALL 1: High score submission
-await submitScoreToBackend("Alice", 850, 10, {
-    math: 3, science: 3, history: 2, cs: 2
-});
-// Executes: Success path, badge check triggers
+// CALL 1: Perfect score - all correct answers
+checkAnswer(0);  // Correct option selected
+// Executes: isCorrect = true, calculates full points + time bonus
 
-// CALL 2: Low score submission  
-await submitScoreToBackend("Bob", 250, 4, {
-    math: 1, science: 0, history: 2, cs: 1
-});
-// Executes: Success path, different badge logic, shows weak areas
+// CALL 2: Incorrect answer
+checkAnswer(2);  // Wrong option selected  
+// Executes: isCorrect = false, no points added, shows explanation
+
+// CALL 3: Timeout (no selection)
+checkAnswer(-1);  // Time expired
+// Executes: isCorrect = false, shows "Time's up!" message
 ```
 
-### Bug Fixed: Leaderboard Race Condition
+### Bug Fixed: Question Loading Race Condition
 
 **Original Error**:
 ```javascript
-// ❌ Bug: Called before data loaded
-async function endGame() {
-    updatePersistentLeaderboard();  // Async but not awaited!
-    loadLeaderboard();  // Uses stale data
+// ❌ Bug: Tried to access empty list
+function startGame() {
+    loadQuestionsFromBackend();  // Async but not awaited!
+    gameQuestions = shuffleArray(allQuestions);  // allQuestions is empty!
 }
 ```
+
+**Problem**: `allQuestions` was still empty when `shuffleArray()` tried to use it, causing no questions to display.
 
 **Fix**:
 ```javascript
 // ✅ Fixed: Proper async/await sequencing
-async function endGame() {
-    await submitScoreToBackend(...);
-    await updatePersistentLeaderboard();  // Wait for backend
-    loadLeaderboard();  // Now has fresh data
+async function startGame() {
+    if (allQuestions.length === 0) {
+        const loaded = await loadQuestionsFromBackend();  // Wait for data
+        if (!loaded) return;  // Exit if loading failed
+    }
+    gameQuestions = shuffleArray(allQuestions);  // Now has data
 }
 ```
 
@@ -333,16 +399,18 @@ async function endGame() {
 
 ## PPR Questions
 
-**Procedure**: `submitScoreToBackend(name, totalScore, correct, subjects)`  
-**Call**: `await submitScoreToBackend(playerName, score, correctCount, subjectScores)`  
-**List Init**: `const tbody = document.getElementById('persistentLeaderboardBody')`  
-**List Use**: `for (let i = 0; i < 10; i++) { const entry = data.leaderboard[i]; }`
+**Procedure**: `loadQuestionsFromBackend()` - fetches question data  
+**Call**: `await loadQuestionsFromBackend()` in `startGame()`  
+**List Init**: `let allQuestions = []` - stores all available questions  
+**List Use**: `gameQuestions[currentQuestionIndex]` - accesses current question
 
-**Boolean Expression**: `if (data.success && data.leaderboard)` checks both success flag AND list existence  
-**If False**: Function returns early, preventing errors from accessing undefined data
+**Boolean Expression**: `if (data.success && data.questions)` checks both API success flag AND list existence  
+**If False**: Throws error, preventing game from starting with invalid data
+
+**Parameters Manage Complexity**: `shuffleArray(array)` works with any list - questions, options, or items. Single procedure handles all randomization needs instead of separate shuffle functions.
 
 ---
 
 ## Conclusion
 
-This program demonstrates procedural abstraction through reusable API calls, manages complexity with lists for leaderboard data, and implements algorithms with proper sequencing, selection (conditionals), and iteration (loops).
+This program demonstrates procedural abstraction through reusable API calls, manages complexity with lists for question banks and options, and implements algorithms with proper sequencing (score calculation), selection (conditionals for correctness), and iteration (processing concept lists).
