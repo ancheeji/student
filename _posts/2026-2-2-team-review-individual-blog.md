@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "AI Study Buddy Progress"
+title: "Weekly Review: AI Study Buddy Progress"
 description: "Quick reflection on accomplishments and goals for next week"
-permalink: /teamreview-individual-submodule-3/
+permalink: /weekly-review-jan30/
 categories: [Review, Progress]
 tags: [reflection, goals, development]
 author: "Your Name"
@@ -16,48 +16,85 @@ date: 2025-01-30
 - Implemented drag-and-drop ordering exercises
 - Created timer system with visual warnings
 - Added badge notification popups with animations
+- Integrated user authentication flow
 
 ### Backend
 - Developed Flask REST API (`/questions`, `/scores`, `/feedback`)
 - Created SQLAlchemy models for data persistence
-- Built "Check for Understanding" tracking system
+- Built "Check for Understanding" tracking system with concept reactions
 - Integrated badge awards with user authentication
 
 ### Technical Skills
 - Used lists for question banks and game state
 - Implemented async/await for API calls
-- Created reusable procedures like `loadQuestionsFromBackend()`
+- Created reusable procedures like `loadQuestionsFromBackend()` and `conceptReaction()`
 - Built algorithms with sequence, selection, and iteration
 
 ---
 
 ## Goals for Next Week
 
-1. **Bug Fixes**: Fix badge display timing and modal z-index issues
-2. **New Content**: Add 5 more drag-and-drop questions
-3. **UX Improvements**: Add loading spinners and better error messages
-4. **Testing**: Write Postman test cases for all API endpoints
+1. **Authentication Integration**: Remove manual name entry—automatically use logged-in user's info. Redirect to login page if not authenticated.
+
+2. **Fix Concept Tracking**: Debug the joke/concept increment system (`haha`/`boohoo` counters not updating correctly after clicks)
+
+3. **Clean Up Formatting**: Remove leaderboard display after quiz completion to focus on personal performance metrics, and make the formatting less bulky 
 
 ---
 
 ## How I'll Improve
 
-### Better Code Organization
+### Authentication Check
 ```javascript
-// ❌ Before: Too long
-async function endGame() {
-    // 50 lines of mixed logic
-}
-
-// ✅ After: Split into focused procedures
-async function endGame() {
-    const results = calculateFinalResults();
-    await saveGameData(results);
-    updateResultsDisplay(results);
+// ✅ New: Verify user is logged in before starting
+async function startGame() {
+    const user = await checkAuthentication();
+    
+    if (!user) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    playerName = user.username;  // Auto-populate from session
+    gameQuestions = shuffleArray(allQuestions);
+    loadQuestion();
 }
 ```
 
-### Improved Error Handling
+### Fix Concept Reaction Updates
+```javascript
+// Current issue: Counters don't refresh properly
+function conceptReaction(type, postURL, elemID) {
+    const options = {
+        ...fetchOptions,
+        method: 'PUT',
+    };
+
+    fetch(postURL, options)
+        .then(response => response.json())
+        .then(data => {
+            // ✅ Add immediate visual feedback
+            const button = document.getElementById(elemID);
+            button.innerHTML = data[type];  // Update count immediately
+            button.style.animation = 'pulse 0.3s';  // Visual confirmation
+        })
+        .catch(err => console.error('Update failed:', err));
+}
+```
+
+### Simplified Results Display
+```javascript
+// ✅ Remove leaderboard section from results screen
+async function endGame() {
+    showScreen('resultsScreen');
+    const results = calculateFinalResults();
+    await saveGameData(results);
+    updateResultsDisplay(results);
+    // Removed: loadLeaderboard() call
+}
+```
+
+### Better Error Messages
 ```javascript
 // ❌ Before
 catch (error) {
@@ -66,23 +103,23 @@ catch (error) {
 
 // ✅ After
 catch (error) {
-    showErrorMessage('Unable to connect. Check your internet.');
+    if (error.message.includes('network')) {
+        showErrorMessage('Unable to connect. Check your internet.');
+    } else if (error.status === 401) {
+        showErrorMessage('Please log in to continue.');
+        setTimeout(() => window.location.href = '/login', 2000);
+    }
 }
 ```
-
-### Add Documentation
-- Write comments explaining complex algorithms
-- Document all API endpoints
-- Add JSDoc to procedures
 
 ---
 
 ## Reflection
 
-**Wins**: Successfully built full-stack app meeting all CPT requirements 
+**Wins**: Successfully built full-stack app with authentication, real-time concept tracking, and badge system 
 
-**Challenges**: Async timing, CORS configuration, CSS positioning
+**Challenges**: Async timing for badge awards, concept counter refresh, authentication flow 
 
-**Key Lesson**: Plan data flow before coding—prevents bugs later 
+**Key Lesson**: Always check user authentication state before allowing access to features
 
-**Next Priority**: Fix bugs, add content, improve error handling 
+**Next Priority**: Integrate auth check, fix concept tracking, streamline results display 
