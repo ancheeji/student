@@ -2,11 +2,11 @@
 layout: post
 title: "Weekly Review: AI Study Buddy Progress"
 description: "Individual contribution and goals for next week"
-permalink: /weekly-review-jan30/
+permalink: /weekly-review-feb-03/
 categories: [Review, Progress]
 tags: [reflection, goals, development]
 author: "Michelle Ji"
-date: 2025-01-30
+date: 2026-02-03
 --- 
 ## What I've Accomplished
 
