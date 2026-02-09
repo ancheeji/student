@@ -6,240 +6,294 @@ permalink: /skill-b-submodule-3/
 categories: [CPT, Backend, JavaScript]
 tags: [flask, api, procedures, algorithms, lists]
 author: "Michelle Ji"
-date: 2025-01-30
+date: 2026-2-09
 ---
 
-## Program Purpose & Function
+### Purpose
+- Interactive game teaching students prompt engineering and responsible AI usage through quizzes
 
-**Purpose**: Educational platform teaching students to craft effective AI prompts through interactive quizzes with performance tracking and concept understanding.
+### Function
+- Students answer 10 AI/ethics questions → earn points → compete on leaderboard → earn badges
 
-**Inputs**: Player name, answer selections, time remaining, concept understanding clicks  
-**Outputs**: Score calculations, performance analytics, badge awards, concept tracking data
+### Inputs
+- Login credentials
+- Answer selections (multiple choice, drag-drop)
+- Feedback ratings (stars, category, comments)
+
+### Outputs
+- Real-time score with time bonuses
+- Live leaderboard (top 10)
+- Badge notifications
+- Performance breakdown by subject
 
 ---
 
-## Data Abstraction - List Usage
+## PROMPT 2A: LIST INITIALIZATION & USAGE
 
+### List Init (File: `hacks/jokes.py`, Lines 10-65)
 ```python
-# FILE: model/prompt_questions.py
-@staticmethod
-def get_questions_by_subject(subject_filter=None):
-    """LIST: Returns filtered list of questions"""
-    if subject_filter:
-        questions = PromptQuestion.query.filter_by(subject=subject_filter).all()
-    else:
-        questions = PromptQuestion.query.all()
-    
-    return [q.to_dict() for q in questions]  # List comprehension
+jokes_data = [
+    {"id": 1, "joke": "Prompt Engineering: ...", "haha": 0, "boohoo": 0},
+    {"id": 2, "joke": "Large Language Models: ...", "haha": 0, "boohoo": 0},
+    # ... 8 more (10 total AI concepts)
+]
 ```
 
-**Why lists matter**:
-- Uses **selection** (if statement) to filter by subject or return all
-- **List comprehension** converts database objects to dictionaries
-- Without lists: separate queries needed for each question type
-- Manages complexity through single filterable structure
+### List Use (Lines 93-99)
+```python
+def addJokeHaHa(id):
+    for joke in jokes_data:  # Iterate through list
+        if joke['id'] == id:
+            joke['haha'] += 1  # Update element
+            return joke
+```
+- **Purpose:** Tracks student understanding of AI concepts
+- **Usage:** Finds concept by ID, increments "Got It" counter
 
 ---
 
-## Algorithm Implementation (Sequence, Selection, Iteration)
+## PROMPT 2B: MANAGING COMPLEXITY
 
+### With List (Good)
 ```python
-# FILE: prompt_game_api.py
-def calculate_performance_metrics(subject_scores, subject_counts):
-    subjects = ['math', 'science', 'history', 'cs']
-    performance = {}
-    weak_areas = []  # List to track subjects needing improvement
-    
-    # ITERATION: Process each subject
-    for subject in subjects:
-        total = subject_counts.get(subject, 0)
-        correct = subject_scores.get(subject, 0)
-        
-        # SELECTION: Check if attempted (Boolean: total > 0)
-        if total > 0:
-            # SEQUENCE: Calculate percentage
-            percentage = (correct / total) * 100
-            performance[subject] = {'correct': correct, 'total': total, 'percentage': round(percentage, 2)}
-            
-            # NESTED SELECTION: Identify weak areas
-            if percentage < 50:
-                weak_areas.append({'subject': subject, 'percentage': percentage})
-    
-    # SEQUENCE: Sort by lowest percentage
-    weak_areas.sort(key=lambda x: x['percentage'])
-    return {'performance': performance, 'weak_areas': weak_areas}
+jokes_data = [concept1, concept2, ...]  # 1 list
+
+def addJokeHaHa(id):
+    for joke in jokes_data:  # 3-line loop
+        if joke['id'] == id:
+            joke['haha'] += 1
 ```
 
-**Algorithm breakdown**:
-- **Iteration**: Loops through subject list
-- **Selection**: Outer if checks if attempted (prevents division by zero), nested if finds weak areas (<50%)
-- **Sequence**: Calculate → store → check threshold → append → sort
-- `weak_areas` list grows dynamically (0-4 items), eliminates hardcoded variables
+### Without List (Bad)
+```python
+concept1 = {...}  # 10 separate variables
+concept2 = {...}
+
+def addJokeHaHa(id):
+    if id == 1: concept1['haha'] += 1  # 30-line if-elif chain
+    elif id == 2: concept2['haha'] += 1
+    # ... 8 more
+```
+
+### Why List is Better
+- 1 data structure vs 10 variables
+- 3-line loop vs 30-line if-elif
+- Adding concept #11 = append to list vs modifying 5+ functions
 
 ---
 
-## Procedural Abstraction - Frontend
+## PROMPT 2C: PROCEDURE & ALGORITHM
 
-### Procedure 1: Load Questions
-
+### Procedure (File: Frontend JS, Lines 400-464)
 ```javascript
-let allQuestions = [];  // LIST INITIALIZATION
-
-async function loadQuestionsFromBackend() {
-    const response = await fetch(`${API_URL}/questions`);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+async function updatePersistentLeaderboard() {
+    // SEQUENCE: Fetch data
+    const response = await fetch(`${API_URL}/leaderboard`);
+    
+    // SELECTION: Check success
+    if (!response.ok) return;
     
     const data = await response.json();
-    if (data.success && data.questions) {
-        allQuestions = data.questions;  // LIST ASSIGNMENT
-        return true;
-    }
-    throw new Error('Invalid response');
-}
-```
-
-**Explanation**:
-- Reusable procedure fetching from API
-- **Selection**: Validates HTTP response and data structure
-- Prevents race condition where game starts with empty list
-
----
-
-### Procedure 2: Shuffle Algorithm
-
-```javascript
-function shuffleArray(array) {
-    const newArray = [...array];
-    // ITERATION: Fisher-Yates shuffle
-    for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];  // SEQUENCE: Swap
-    }
-    return newArray;
-}
-```
-
-**Explanation**:
-- **Iteration**: For loop processes list backwards
-- **Sequence**: Swap operation randomizes elements
-- **Procedural abstraction**: Works with any list via parameter (questions, options, items)
-
----
-
-### Procedure 3: Score Calculation
-
-```javascript
-function checkAnswer(optionIndex) {
-    const question = gameQuestions[currentQuestionIndex];  // LIST ACCESS
-    const selectedOption = optionIndex >= 0 ? window.currentOptions[optionIndex] : null;
-    const isCorrect = selectedOption && selectedOption.isCorrect;
-
-    // SELECTION: Calculate points if correct
-    if (isCorrect) {
-        const timeBonus = Math.floor(timeLeft / 3);  // SEQUENCE
-        score += 100 + timeBonus;
-        subjectScores[question.subject]++;
-    }
+    const tbody = document.getElementById('persistentLeaderboardBody');
     
-    displayFeedback(isCorrect, selectedOption);  // PROCEDURE CALL
+    // ITERATION: Build 10 rows
+    for (let i = 0; i < 10; i++) {
+        const entry = data.leaderboard[i];
+        
+        // SELECTION: Medal for top 3
+        if (i === 0) rankHtml = `🥇 1`;
+        else if (i === 1) rankHtml = `🥈 2`;
+        else if (i === 2) rankHtml = `🥉 3`;
+        else rankHtml = `${i + 1}`;
+        
+        // SELECTION: Data or placeholder
+        if (entry) {
+            tr.innerHTML = `${rankHtml} | ${entry.playerName} | ${entry.score}`;
+        } else {
+            tr.innerHTML = `${rankHtml} | - | -`;
+        }
+        tbody.appendChild(tr);
+    }
 }
 ```
 
-**Explanation**:
-- **List access**: Gets current question and option
-- **Selection**: If correct, calculates score
-- **Sequence**: Base points + time bonus (every 3 seconds = 1 point)
-- Calls separate `displayFeedback()` procedure (modularity)
+### Algorithm Steps
+1. **SEQUENCE:** Fetch leaderboard from API
+2. **SELECTION:** Validate response
+3. **ITERATION:** Loop 10 times
+4. **SELECTION:** Assign medals (🥇🥈🥉) for top 3
+5. **SELECTION:** Display data if exists, else "-"
+
+### Call (Line 385)
+```javascript
+updatePersistentLeaderboard();  // Display leaderboard
+setInterval(updatePersistentLeaderboard, 30000);  // Refresh every 30s
+```
 
 ---
 
-### Procedure 4: Concept Tracking
+## PROMPT 2D: TESTING & DEBUGGING
 
+### Bug: Empty Leaderboard Crash
+- **Problem:** `Cannot read property 'playerName' of undefined`
+- **Input:** Database with 3 scores, page loads
+- **Expected:** 3 data rows + 7 placeholders
+- **Actual:** Crash at row 4
+
+### Debug Process
 ```javascript
-async function loadConceptsData() {
-    const response = await fetch(`${pythonURI}/api/jokes/`);
-    const data = await response.json();  // List of concepts
+// Added logs
+console.log('Index:', i, 'Entry:', entry);
+// Output: Index: 3, Entry: undefined ← FOUND IT
+```
+
+### Before (Buggy)
+```javascript
+for (let i = 0; i < 10; i++) {
+    const entry = data.leaderboard[i];
+    tr.innerHTML = `<td>${entry.playerName}</td>`;  // CRASH if undefined
+}
+```
+
+### After (Fixed)
+```javascript
+for (let i = 0; i < 10; i++) {
+    const entry = data.leaderboard[i];
+    if (entry) {  // Check exists
+        tr.innerHTML = `<td>${entry.playerName}</td>`;
+    } else {
+        tr.innerHTML = `<td>-</td>`;  // Placeholder
+    }
+}
+```
+
+### Result
+- ✅ 3 data rows + 7 placeholders
+- ✅ No crash
+
+---
+
+## PPR QUESTIONS
+
+### Q1: Selection Statement
+
+**Procedure:** `updatePersistentLeaderboard()`
+
+**First Conditional:**
+```javascript
+if (!response.ok) return;
+```
+- **Boolean:** `!response.ok` = HTTP request failed
+- **If FALSE:** Continue → parse JSON → update leaderboard
+- **If TRUE:** Exit early → log error → keep old data
+
+---
+
+### Q2: Parameters
+
+**Procedure:** `conceptReactionModal(type, postURL, elemID)`
+
+**Parameters:**
+- `type` = "haha" or "boohoo"
+- `postURL` = API endpoint
+- `elemID` = button ID
+
+**Manages Complexity:**
+- **Without:** 20+ separate functions (1 per button)
+- **With:** 1 function handles all buttons via parameters
+- **Example:**
+```javascript
+conceptReactionModal('haha', '/api/jokes/like/1', 'haha1_modal');
+conceptReactionModal('boohoo', '/api/jokes/jeer/5', 'boohoo5_modal');
+```
+
+---
+
+### Q3: Different Calls
+
+**Call #1:**
+```javascript
+conceptReactionModal('haha', '/api/jokes/like/1', 'haha1_modal');
+```
+- Checks `if (type === 'haha')` → TRUE
+- Updates `data.haha` count
+
+**Call #2:**
+```javascript
+conceptReactionModal('boohoo', '/api/jokes/jeer/5', 'boohoo5_modal');
+```
+- Checks `if (type === 'haha')` → FALSE
+- Checks `else if (type === 'boohoo')` → TRUE
+- Updates `data.boohoo` count
+
+**Different paths:** Same function, different conditionals executed
+
+---
+
+### Q4: Logic Error
+
+**Correct Code:**
+```python
+entry.create()  # Save score FIRST
+top_10_user_ids = [e.user_id for e in LeaderboardEntry.get_top_scores(10)]
+if g.current_user.id in top_10_user_ids:  # THEN check top 10
+    award_badge()
+```
+
+**Buggy Code:**
+```python
+top_10_user_ids = [...]  # Check top 10 FIRST (before saving)
+if g.current_user.id in top_10_user_ids:
+    award_badge()
+entry.create()  # Save score AFTER (too late!)
+```
+
+**Scenario:** User scores 120 (new #1)
+- **Buggy:** Check top 10 → not there yet → no badge → save score ❌
+- **Correct:** Save score → check top 10 → found → badge awarded ✅
+
+---
+
+### Q5: List Usage
+
+**Accessing:**
+```python
+def getJoke(id):
+    for joke in jokes_data:  # Traverse
+        if joke['id'] == id: return joke  # Find & return
+```
+
+**Updating:**
+```python
+def addJokeHaHa(id):
+    for joke in jokes_data:  # Traverse
+        if joke['id'] == id:
+            joke['haha'] += 1  # Increment (calculation)
+```
+
+**Why:** 1 list + loop vs 10 variables + 30-line if-elif
+
+---
+
+### Q6: Algorithm
+
+**Iteration:**
+```javascript
+for (let i = 0; i < 10; i++) {
+    const entry = data.leaderboard[i];  // Get element
     
-    // ITERATION: Process each concept
-    for (const row of data) {
-        const gotItBtn = document.createElement('button');
-        gotItBtn.innerHTML = row.haha;
-        gotItBtn.onclick = () => conceptReaction('haha', `/api/jokes/like/${row.id}`, gotItBtn.id);
-        // ... create row
-    }
-}
-
-function conceptReaction(type, postURL, elemID) {
-    fetch(postURL, {method: 'PUT'})
-        .then(response => response.json())
-        .then(data => {
-            // SELECTION: Update correct counter
-            if (type === 'haha') {
-                document.getElementById(elemID).innerHTML = data.haha;
-            } else if (type === 'boohoo') {
-                document.getElementById(elemID).innerHTML = data.boohoo;
-            }
-        });
+    if (i === 0) rank = "🥇 1";  // Top 3 get medals
+    else if (i === 1) rank = "🥈 2";
+    else if (i === 2) rank = "🥉 3";
+    else rank = `${i + 1}`;
+    
+    if (entry) display(entry.name, entry.score);  // Data or placeholder
+    else display("-", "-");
 }
 ```
 
-**Explanation**:
-- **Iteration**: For loop creates row for each concept
-- **Procedural abstraction**: `type` parameter determines which counter updates
-- **Selection**: If/else chooses between "haha" or "boohoo"
-- Eliminates duplicate code
-
----
-
-## Testing & Debugging
-
-### Different Procedure Calls
-
-```javascript
-checkAnswer(0);   // CALL 1: Correct - executes scoring logic
-checkAnswer(2);   // CALL 2: Incorrect - skips scoring, shows feedback
-checkAnswer(-1);  // CALL 3: Timeout - handles edge case
-```
-
-### Bug Fixed: Race Condition
-
-```javascript
-// ❌ Bug: shuffleArray() ran before data loaded
-function startGame() {
-    loadQuestionsFromBackend();  // Not awaited
-    gameQuestions = shuffleArray(allQuestions);  // Empty!
-}
-
-// ✅ Fix: Proper async/await sequencing
-async function startGame() {
-    if (allQuestions.length === 0) {
-        await loadQuestionsFromBackend();  // Wait for data
-    }
-    gameQuestions = shuffleArray(allQuestions);  // Now has data
-}
-```
-
-**Explanation**:
-- **Logic error**: Function executed before API completed
-- **Fix**: Added `await` to pause until loading finishes
-- Demonstrates proper **sequencing**: load → validate → use
-
----
-
-## PPR Questions
-
-**Procedure**: `loadQuestionsFromBackend()`  
-**Call**: `await loadQuestionsFromBackend()` in `startGame()`  
-**List Init**: `let allQuestions = []`  
-**List Use**: `gameQuestions[currentQuestionIndex]`
-
-**Boolean**: `if (data.success && data.questions)` - checks API success AND list existence  
-**If False**: Throws error, prevents game from starting with invalid data
-
-**Parameters**: `shuffleArray(array)` works with any list - single procedure handles all randomization
-
----
-
-## Conclusion
-
-This program demonstrates procedural abstraction through reusable API calls, manages complexity with lists for question banks, and implements algorithms with sequencing, selection, and iteration.
+**Process Each Element:**
+1. Get element at index i
+2. Assign rank (medals for top 3)
+3. Display data if exists, else "-"
+4. Always creates 10 rows
