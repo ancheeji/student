@@ -9,6 +9,8 @@ author: "Michelle Ji"
 date: 2026-2-09
 ---
 
+## PROGRAM PURPOSE AND FUNCTION
+
 ### Purpose
 - Interactive game teaching students prompt engineering and responsible AI usage through quizzes
 
@@ -28,7 +30,7 @@ date: 2026-2-09
 
 ---
 
-## PROMPT 2A: LIST INITIALIZATION & USAGE
+## LIST INITIALIZATION & USAGE
 
 ### List Init (File: `hacks/jokes.py`, Lines 10-65)
 ```python
@@ -52,7 +54,7 @@ def addJokeHaHa(id):
 
 ---
 
-## PROMPT 2B: MANAGING COMPLEXITY
+## MANAGING COMPLEXITY
 
 ### With List (Good)
 ```python
@@ -82,7 +84,7 @@ def addJokeHaHa(id):
 
 ---
 
-## PROMPT 2C: PROCEDURE & ALGORITHM
+## PROCEDURE & ALGORITHM
 
 ### Procedure (File: Frontend JS, Lines 400-464)
 ```javascript
@@ -132,44 +134,83 @@ setInterval(updatePersistentLeaderboard, 30000);  // Refresh every 30s
 
 ---
 
-## PROMPT 2D: TESTING & DEBUGGING
+## TESTING & DEBUGGING
 
-### Bug: Empty Leaderboard Crash
-- **Problem:** `Cannot read property 'playerName' of undefined`
-- **Input:** Database with 3 scores, page loads
-- **Expected:** 3 data rows + 7 placeholders
-- **Actual:** Crash at row 4
+### Bug #1: Duplicate Incrementing (Check for Understanding)
+- **Problem:** Spam-clicking "Got It" buttons sent multiple API requests
+- **Input:** User clicks button 5 times rapidly
+- **Expected:** Counter increases by 1
+- **Actual:** Counter increases by 5
 
 ### Debug Process
 ```javascript
-// Added logs
-console.log('Index:', i, 'Entry:', entry);
-// Output: Index: 3, Entry: undefined ← FOUND IT
+console.log('Button clicked:', elemID, 'Disabled:', el.disabled);
+// Output showed: Button clicked 5 times before disabled = true
 ```
 
 ### Before (Buggy)
 ```javascript
-for (let i = 0; i < 10; i++) {
-    const entry = data.leaderboard[i];
-    tr.innerHTML = `<td>${entry.playerName}</td>`;  // CRASH if undefined
+function conceptReactionModal(type, postURL, elemID) {
+    const el = document.getElementById(elemID);
+    el.disabled = true;  // Too late - already clicked 5 times!
+    fetch(postURL);
 }
 ```
 
 ### After (Fixed)
 ```javascript
-for (let i = 0; i < 10; i++) {
-    const entry = data.leaderboard[i];
-    if (entry) {  // Check exists
-        tr.innerHTML = `<td>${entry.playerName}</td>`;
+const _pendingRequests = new Set();
+
+function conceptReactionModal(type, postURL, elemID) {
+    const el = document.getElementById(elemID);
+    
+    if (el.disabled || _pendingRequests.has(elemID)) {
+        return;  // Block duplicate clicks
+    }
+    
+    _pendingRequests.add(elemID);
+    el.disabled = true;
+    fetch(postURL);
+}
+```
+
+### Result
+- ✅ Counter increments by exactly 1
+- ✅ Duplicate clicks blocked
+
+---
+
+### Bug #2: Playing Without Login
+- **Problem:** Users could access quiz without authentication
+- **Expected:** Login required to save scores
+- **Actual:** Game accessible to anyone, scores not saved
+
+### Before (Buggy)
+```javascript
+// No authentication check
+document.getElementById('gameStart').style.display = 'block';
+```
+
+### After (Fixed)
+```javascript
+async function checkAuthenticationAndSetup() {
+    const response = await fetch(`${pythonURI}/api/id`, {
+        credentials: 'include'
+    });
+    
+    if (response.ok) {
+        // Logged in - show game
+        document.getElementById('gameStart').style.display = 'block';
     } else {
-        tr.innerHTML = `<td>-</td>`;  // Placeholder
+        // Not logged in - require login
+        document.getElementById('loginRequired').style.display = 'block';
     }
 }
 ```
 
 ### Result
-- ✅ 3 data rows + 7 placeholders
-- ✅ No crash
+- ✅ Users must log in before playing
+- ✅ All scores properly saved to accounts
 
 ---
 
