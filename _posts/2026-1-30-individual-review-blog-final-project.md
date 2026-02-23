@@ -13,20 +13,23 @@ date: 2026-2-09
 
 ### Purpose
 - Interactive game teaching students prompt engineering and responsible AI usage through quizzes
+- Tracks user progress with authentication and concept understanding feedback
 
 ### Function
-- Students answer 10 AI/ethics questions → earn points → compete on leaderboard → earn badges
+- Students log in → answer 10 AI/ethics questions → earn scores → mark concepts as understood
+- Authentication required to save progress and track learning
 
 ### Inputs
-- Login credentials
+- Login credentials (username, password)
 - Answer selections (multiple choice, drag-drop)
+- Concept understanding reactions ("Got It" / "Need Help")
 - Feedback ratings (stars, category, comments)
 
 ### Outputs
 - Real-time score with time bonuses
-- Live leaderboard (top 10)
-- Badge notifications
+- Live concept understanding counters
 - Performance breakdown by subject
+- Feedback summary showing aggregate ratings
 
 ---
 
@@ -49,8 +52,8 @@ def addJokeHaHa(id):
             joke['haha'] += 1  # Update element
             return joke
 ```
-- **Purpose:** Tracks student understanding of AI concepts
-- **Usage:** Finds concept by ID, increments "Got It" counter
+- **Purpose:** Tracks student understanding of AI concepts via "Got It" reactions
+- **Usage:** Finds concept by ID, increments counter when clicked
 
 ---
 
@@ -86,50 +89,65 @@ def addJokeHaHa(id):
 
 ## PROCEDURE & ALGORITHM
 
-### Procedure (File: Frontend JS, Lines 400-464)
+### Procedure (File: Frontend JS, Lines 560-620)
 ```javascript
-async function updatePersistentLeaderboard() {
-    // SEQUENCE: Fetch data
-    const response = await fetch(`${API_URL}/leaderboard`);
+async function checkAuthenticationAndSetup() {
+    // SEQUENCE: Fetch authentication status
+    const response = await fetch(`${pythonURI}/api/id`, {
+        credentials: 'include'
+    });
     
-    // SELECTION: Check success
-    if (!response.ok) return;
+    console.log('Response status:', response.status);
     
-    const data = await response.json();
-    const tbody = document.getElementById('persistentLeaderboardBody');
-    
-    // ITERATION: Build 10 rows
-    for (let i = 0; i < 10; i++) {
-        const entry = data.leaderboard[i];
+    // SELECTION: Check if user is authenticated
+    if (response.ok) {
+        // SEQUENCE: Parse user data
+        const userData = await response.json();
+        authenticatedDisplayName = userData.name || userData.uid || 'Player';
+        playerName = authenticatedDisplayName;
         
-        // SELECTION: Medal for top 3
-        if (i === 0) rankHtml = `🥇 1`;
-        else if (i === 1) rankHtml = `🥈 2`;
-        else if (i === 2) rankHtml = `🥉 3`;
-        else rankHtml = `${i + 1}`;
-        
-        // SELECTION: Data or placeholder
-        if (entry) {
-            tr.innerHTML = `${rankHtml} | ${entry.playerName} | ${entry.score}`;
-        } else {
-            tr.innerHTML = `${rankHtml} | - | -`;
+        // SELECTION: Update UI elements
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        if (welcomeMessage) {
+            welcomeMessage.innerHTML = `Time to test your Responsible AI skills, <span style="color: #fbbf24;">${authenticatedDisplayName}</span>!`;
         }
-        tbody.appendChild(tr);
+        
+        // Show game start screen
+        const loginRequired = document.getElementById('loginRequired');
+        const gameStart = document.getElementById('gameStart');
+        
+        if (loginRequired && gameStart) {
+            loginRequired.style.display = 'none';
+            gameStart.style.display = 'block';
+        }
+    } else {
+        // User NOT authenticated - show login required
+        const loginRequired = document.getElementById('loginRequired');
+        const gameStart = document.getElementById('gameStart');
+        
+        if (loginRequired && gameStart) {
+            loginRequired.style.display = 'block';
+            gameStart.style.display = 'none';
+        }
     }
 }
 ```
 
 ### Algorithm Steps
-1. **SEQUENCE:** Fetch leaderboard from API
-2. **SELECTION:** Validate response
-3. **ITERATION:** Loop 10 times
-4. **SELECTION:** Assign medals (🥇🥈🥉) for top 3
-5. **SELECTION:** Display data if exists, else "-"
+1. **SEQUENCE:** Fetch user authentication status from API
+2. **SELECTION:** Validate response (is user logged in?)
+3. **SELECTION:** If authenticated → parse user data
+4. **SEQUENCE:** Set display name from user data
+5. **SELECTION:** Update welcome message if element exists
+6. **SELECTION:** Show appropriate screen (game start vs login required)
+7. **SELECTION:** If not authenticated → show login screen
 
-### Call (Line 385)
+### Call (Line 703)
 ```javascript
-updatePersistentLeaderboard();  // Display leaderboard
-setInterval(updatePersistentLeaderboard, 30000);  // Refresh every 30s
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuthenticationAndSetup();  // Check auth on page load
+    updatePersistentLeaderboard();   // Load top scores
+});
 ```
 
 ---
@@ -164,26 +182,43 @@ const _pendingRequests = new Set();
 function conceptReactionModal(type, postURL, elemID) {
     const el = document.getElementById(elemID);
     
+    // SELECTION: Check if request already pending
     if (el.disabled || _pendingRequests.has(elemID)) {
         return;  // Block duplicate clicks
     }
     
-    _pendingRequests.add(elemID);
+    _pendingRequests.add(elemID);  // Track request
     el.disabled = true;
-    fetch(postURL);
+    
+    // Optimistic update
+    const currentCount = Number(el.dataset.count) || 0;
+    el.textContent = String(currentCount + 1);
+    
+    fetch(postURL, options)
+        .then(response => response.json())
+        .then(data => {
+            // Update with server value
+            if (type === 'haha') el.textContent = String(data.haha);
+            else el.textContent = String(data.boohoo);
+        })
+        .finally(() => {
+            el.disabled = false;
+            _pendingRequests.delete(elemID);
+        });
 }
 ```
 
 ### Result
 - ✅ Counter increments by exactly 1
-- ✅ Duplicate clicks blocked
+- ✅ Duplicate clicks blocked via Set tracking
+- ✅ Optimistic UI updates (instant feedback)
 
 ---
 
 ### Bug #2: Playing Without Login
 - **Problem:** Users could access quiz without authentication
-- **Expected:** Login required to save scores
-- **Actual:** Game accessible to anyone, scores not saved
+- **Expected:** Login required to save scores and progress
+- **Actual:** Game accessible to anyone, no progress saved
 
 ### Before (Buggy)
 ```javascript
@@ -200,17 +235,24 @@ async function checkAuthenticationAndSetup() {
     
     if (response.ok) {
         // Logged in - show game
+        const userData = await response.json();
+        authenticatedDisplayName = userData.name || userData.uid;
+        playerName = authenticatedDisplayName;
+        
+        document.getElementById('loginRequired').style.display = 'none';
         document.getElementById('gameStart').style.display = 'block';
     } else {
         // Not logged in - require login
         document.getElementById('loginRequired').style.display = 'block';
+        document.getElementById('gameStart').style.display = 'none';
     }
 }
 ```
 
 ### Result
 - ✅ Users must log in before playing
-- ✅ All scores properly saved to accounts
+- ✅ All progress properly saved to authenticated accounts
+- ✅ Display name shown in welcome message
 
 ---
 
@@ -218,15 +260,19 @@ async function checkAuthenticationAndSetup() {
 
 ### Q1: Selection Statement
 
-**Procedure:** `updatePersistentLeaderboard()`
+**Procedure:** `checkAuthenticationAndSetup()`
 
 **First Conditional:**
 ```javascript
-if (!response.ok) return;
+if (response.ok) {
+    // User authenticated - show game
+} else {
+    // User NOT authenticated - show login
+}
 ```
-- **Boolean:** `!response.ok` = HTTP request failed
-- **If FALSE:** Continue → parse JSON → update leaderboard
-- **If TRUE:** Exit early → log error → keep old data
+- **Boolean:** `response.ok` = HTTP request succeeded (status 200-299)
+- **If TRUE:** Parse user data → set display name → show game start screen
+- **If FALSE:** Show login required message → block game access
 
 ---
 
@@ -235,13 +281,13 @@ if (!response.ok) return;
 **Procedure:** `conceptReactionModal(type, postURL, elemID)`
 
 **Parameters:**
-- `type` = "haha" or "boohoo"
-- `postURL` = API endpoint
-- `elemID` = button ID
+- `type` = "haha" or "boohoo" (which counter to update)
+- `postURL` = API endpoint for the reaction
+- `elemID` = DOM element ID of the button
 
 **Manages Complexity:**
-- **Without:** 20+ separate functions (1 per button)
-- **With:** 1 function handles all buttons via parameters
+- **Without:** 20+ separate functions (1 per button per concept)
+- **With:** 1 function handles all 20 buttons via parameters
 - **Example:**
 ```javascript
 conceptReactionModal('haha', '/api/jokes/like/1', 'haha1_modal');
@@ -257,7 +303,8 @@ conceptReactionModal('boohoo', '/api/jokes/jeer/5', 'boohoo5_modal');
 conceptReactionModal('haha', '/api/jokes/like/1', 'haha1_modal');
 ```
 - Checks `if (type === 'haha')` → TRUE
-- Updates `data.haha` count
+- Updates "Got It" counter for concept 1
+- Posts to `/api/jokes/like/1`
 
 **Call #2:**
 ```javascript
@@ -265,33 +312,47 @@ conceptReactionModal('boohoo', '/api/jokes/jeer/5', 'boohoo5_modal');
 ```
 - Checks `if (type === 'haha')` → FALSE
 - Checks `else if (type === 'boohoo')` → TRUE
-- Updates `data.boohoo` count
+- Updates "Need Help" counter for concept 5
+- Posts to `/api/jokes/jeer/5`
 
-**Different paths:** Same function, different conditionals executed
+**Different paths:** Same function, different conditionals executed based on `type` parameter
 
 ---
 
 ### Q4: Logic Error
 
 **Correct Code:**
-```python
-entry.create()  # Save score FIRST
-top_10_user_ids = [e.user_id for e in LeaderboardEntry.get_top_scores(10)]
-if g.current_user.id in top_10_user_ids:  # THEN check top 10
-    award_badge()
+```javascript
+async function checkAuthenticationAndSetup() {
+    const response = await fetch(`${pythonURI}/api/id`, {
+        credentials: 'include'  // CRITICAL: Include auth cookies
+    });
+    
+    if (response.ok) {
+        const userData = await response.json();
+        playerName = userData.name;  // Use authenticated name
+        showGameScreen();
+    }
+}
 ```
 
 **Buggy Code:**
-```python
-top_10_user_ids = [...]  # Check top 10 FIRST (before saving)
-if g.current_user.id in top_10_user_ids:
-    award_badge()
-entry.create()  # Save score AFTER (too late!)
+```javascript
+async function checkAuthenticationAndSetup() {
+    const response = await fetch(`${pythonURI}/api/id`);
+    // Missing credentials: 'include' - cookies not sent!
+    
+    if (response.ok) {
+        const userData = await response.json();
+        playerName = userData.name;
+        showGameScreen();
+    }
+}
 ```
 
-**Scenario:** User scores 120 (new #1)
-- **Buggy:** Check top 10 → not there yet → no badge → save score ❌
-- **Correct:** Save score → check top 10 → found → badge awarded ✅
+**Scenario:** User is logged in with valid session cookie
+- **Buggy:** Fetch without credentials → server doesn't receive cookie → returns 401 → user sees login screen ❌
+- **Correct:** Fetch with credentials → server receives cookie → validates session → user sees game ✅
 
 ---
 
@@ -300,19 +361,21 @@ entry.create()  # Save score AFTER (too late!)
 **Accessing:**
 ```python
 def getJoke(id):
-    for joke in jokes_data:  # Traverse
-        if joke['id'] == id: return joke  # Find & return
+    for joke in jokes_data:  # Traverse list
+        if joke['id'] == id:
+            return joke  # Find & return element
 ```
 
 **Updating:**
 ```python
 def addJokeHaHa(id):
-    for joke in jokes_data:  # Traverse
+    for joke in jokes_data:  # Traverse list
         if joke['id'] == id:
-            joke['haha'] += 1  # Increment (calculation)
+            joke['haha'] += 1  # Increment counter (calculation)
+            return joke
 ```
 
-**Why:** 1 list + loop vs 10 variables + 30-line if-elif
+**Why:** 1 list + loop vs 10 variables + 30-line if-elif chain
 
 ---
 
@@ -320,21 +383,65 @@ def addJokeHaHa(id):
 
 **Iteration:**
 ```javascript
-for (let i = 0; i < 10; i++) {
-    const entry = data.leaderboard[i];  // Get element
-    
-    if (i === 0) rank = "🥇 1";  // Top 3 get medals
-    else if (i === 1) rank = "🥈 2";
-    else if (i === 2) rank = "🥉 3";
-    else rank = `${i + 1}`;
-    
-    if (entry) display(entry.name, entry.score);  // Data or placeholder
-    else display("-", "-");
+function loadConceptsDataForModal() {
+    fetch(getConceptsURLModal)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById("conceptsResultModal");
+            container.innerHTML = '';
+            
+            // ITERATION: Process each concept
+            for (const row of data) {
+                const tr = document.createElement("tr");
+                
+                // Create concept cell
+                const concept = document.createElement("td");
+                concept.textContent = row.id + ". " + (row.joke || '');
+                
+                // Create "Got It" button
+                const gotItBtn = document.createElement('button');
+                gotItBtn.id = 'haha' + row.id + "_modal";
+                gotItBtn.textContent = String(row.haha || 0);
+                gotItBtn.dataset.count = String(row.haha || 0);
+                
+                // SELECTION: Setup click handler
+                gotItBtn.addEventListener('click', function() {
+                    conceptReactionModal('haha', pythonURI + '/api/jokes/like/' + row.id, gotItBtn.id);
+                });
+                
+                // Create "Need Help" button
+                const needHelpBtn = document.createElement('button');
+                needHelpBtn.id = 'boohoo' + row.id + "_modal";
+                needHelpBtn.textContent = String(row.boohoo || 0);
+                needHelpBtn.dataset.count = String(row.boohoo || 0);
+                
+                // SELECTION: Setup click handler
+                needHelpBtn.addEventListener('click', function() {
+                    conceptReactionModal('boohoo', pythonURI + '/api/jokes/jeer/' + row.id, needHelpBtn.id);
+                });
+                
+                // Add cells to row
+                const gotItCell = document.createElement("td");
+                gotItCell.appendChild(gotItBtn);
+                const needHelpCell = document.createElement("td");
+                needHelpCell.appendChild(needHelpBtn);
+                
+                tr.appendChild(concept);
+                tr.appendChild(gotItCell);
+                tr.appendChild(needHelpCell);
+                container.appendChild(tr);
+            }
+        });
 }
 ```
 
 **Process Each Element:**
-1. Get element at index i
-2. Assign rank (medals for top 3)
-3. Display data if exists, else "-"
-4. Always creates 10 rows
+1. **ITERATION:** Loop through all concepts in data array
+2. Create table row for this concept
+3. Create concept text cell with ID and description
+4. **SELECTION:** Create "Got It" button with counter value
+5. **SELECTION:** Attach click handler that calls `conceptReactionModal` with 'haha'
+6. **SELECTION:** Create "Need Help" button with counter value
+7. **SELECTION:** Attach click handler that calls `conceptReactionModal` with 'boohoo'
+8. Append all cells to row, add row to container
+9. Process repeats for all 10 concepts
