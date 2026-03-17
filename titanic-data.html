@@ -3,14 +3,13 @@ layout: base
 title: Titanic Survival Predictor
 description: Predict passenger survival probability using a logistic regression model.
 permalink: /titanic/
-courses: { csp: {week: 1} }
 type: collab
 ---
 
 <div id="titanic-app">
   <h1>Titanic Survival Predictor</h1>
   <p>Enter passenger details to estimate survival probability.</p>
-
+ 
   <div class="t-grid">
     <div class="t-field">
       <label>Name</label>
@@ -63,11 +62,11 @@ type: collab
       </select>
     </div>
   </div>
-
+ 
   <button id="predict-btn" onclick="predictSurvival()">Predict Survival</button>
-
+ 
   <p id="t-error" style="color:red; display:none;"></p>
-
+ 
   <div id="t-result" style="display:none; margin-top:20px;">
     <p id="t-verdict" style="font-weight:bold; font-size:18px;"></p>
     <label>Survival</label>
@@ -79,7 +78,7 @@ type: collab
     <small id="die-pct"></small>
   </div>
 </div>
-
+ 
 <style>
   #titanic-app {
     max-width: 600px;
@@ -96,10 +95,14 @@ type: collab
   .t-field label { font-size: 12px; font-weight: bold; text-transform: uppercase; }
   .t-field input, .t-field select {
     padding: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #555;
     border-radius: 3px;
     font-size: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
   }
+  .t-field input::placeholder { color: #999; }
+  .t-field select option { background: #1e1e1e; color: #f0f0f0; }
   button {
     width: 100%;
     padding: 12px;
@@ -118,18 +121,18 @@ type: collab
   .red { background: #dc2626; }
   @media (max-width: 500px) { .t-grid { grid-template-columns: 1fr; } }
 </style>
-
+ 
 <script>
   async function predictSurvival() {
     const btn = document.getElementById('predict-btn');
     const errorEl = document.getElementById('t-error');
     const resultEl = document.getElementById('t-result');
-
+ 
     errorEl.style.display = 'none';
     resultEl.style.display = 'none';
     btn.disabled = true;
     btn.textContent = 'Predicting...';
-
+ 
     const passenger = {
       name:     [document.getElementById('name').value || 'Passenger'],
       pclass:   [parseInt(document.getElementById('pclass').value)],
@@ -141,32 +144,32 @@ type: collab
       embarked: [document.getElementById('embarked').value],
       alone:    [document.getElementById('alone').value === 'true'],
     };
-
+ 
     try {
       const res = await fetch('http://localhost:8001/api/titanic/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(passenger),
       });
-
+ 
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
-
+ 
       const survivePct = Math.round(data.survive * 100);
       const diePct = Math.round(data.die * 100);
       const survived = survivePct >= 50;
-
+ 
       document.getElementById('survive-pct').textContent = survivePct + '%';
       document.getElementById('die-pct').textContent = diePct + '%';
       document.getElementById('survive-bar').style.width = survivePct + '%';
       document.getElementById('die-bar').style.width = diePct + '%';
-
+ 
       const verdict = document.getElementById('t-verdict');
       verdict.textContent = survived ? '✓ Likely Survived' : '✗ Likely Did Not Survive';
       verdict.style.color = survived ? '#16a34a' : '#dc2626';
-
+ 
       resultEl.style.display = 'block';
-
+ 
     } catch (e) {
       errorEl.textContent = 'Error: ' + e.message;
       errorEl.style.display = 'block';
