@@ -1,0 +1,150 @@
+---
+layout: base
+title: Number Guessing Game
+permalink: /number-guessing-game
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Guessing Game</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #1a1a2e; color: #eaeaea; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+
+  <div style="background-color: #16213e; border-radius: 12px; padding: 2rem; width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+    <h1 style="text-align: center; color: #e94560; margin-bottom: 0.25rem;">Number Guessing Game</h1>
+    <p style="text-align: center; color: #a8a8b3; margin-top: 0.25rem; margin-bottom: 1.5rem;">Guess a number between 1 and 100</p>
+
+    <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+      <input
+        id="guessInput"
+        type="number"
+        min="1"
+        max="100"
+        placeholder="Enter your guess..."
+        style="flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid #0f3460; background-color: #0f3460; color: #eaeaea; font-size: 16px; outline: none;"
+      />
+      <button
+        onclick="submitGuess()"
+        style="padding: 10px 18px; background-color: #e94560; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;"
+      >
+        Guess
+      </button>
+    </div>
+
+    <div id="feedback" style="text-align: center; font-size: 18px; font-weight: bold; min-height: 28px; margin-bottom: 1rem; color: #e94560;"></div>
+
+    <div style="background-color: #0f3460; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+      <p style="margin: 0 0 8px 0; font-size: 14px; color: #a8a8b3;">Previous Guesses:</p>
+      <div id="guessList" style="font-size: 14px; color: #eaeaea; min-height: 20px; word-wrap: break-word;">None yet</div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; font-size: 14px; color: #a8a8b3; margin-bottom: 1rem;">
+      <span>Guesses: <span id="guessCount" style="color: #eaeaea; font-weight: bold;">0</span></span>
+      <span id="rangeHint" style="color: #a8a8b3;">Range: 1 – 100</span>
+    </div>
+
+    <button
+      onclick="resetGame()"
+      style="width: 100%; padding: 10px; background-color: #0f3460; color: #eaeaea; border: 1px solid #e94560; border-radius: 8px; font-size: 15px; cursor: pointer;"
+    >
+      New Game
+    </button>
+  </div>
+
+  <script>
+    let secretNumber = Math.floor(Math.random() * 100) + 1;
+    let previousGuesses = [];
+    let gameOver = false;
+    let lowBound = 1;
+    let highBound = 100;
+
+    function checkGuess(guess, secret, guesses) {
+      if (guesses.includes(guess)) {
+        return "duplicate";
+      }
+
+      guesses.push(guess);
+
+      if (guess < secret) {
+        return "low";
+      } else if (guess > secret) {
+        return "high";
+      } else {
+        return "correct";
+      }
+    }
+
+    function submitGuess() {
+      if (gameOver) return;
+
+      const input = document.getElementById("guessInput");
+      const guess = parseInt(input.value);
+
+      if (isNaN(guess) || guess < 1 || guess > 100) {
+        document.getElementById("feedback").textContent = "Please enter a number between 1 and 100.";
+        document.getElementById("feedback").style.color = "#a8a8b3";
+        return;
+      }
+
+      const result = checkGuess(guess, secretNumber, previousGuesses);
+      const feedback = document.getElementById("feedback");
+      const guessList = document.getElementById("guessList");
+      const guessCount = document.getElementById("guessCount");
+      const rangeHint = document.getElementById("rangeHint");
+
+      guessList.textContent = previousGuesses.join(", ");
+      guessCount.textContent = previousGuesses.length;
+
+      if (result === "duplicate") {
+        feedback.textContent = `You already guessed ${guess}! Try again.`;
+        feedback.style.color = "#f0a500";
+        previousGuesses.pop();
+        guessList.textContent = previousGuesses.join(", ") || "None yet";
+        guessCount.textContent = previousGuesses.length;
+      } else if (result === "low") {
+        feedback.textContent = `Too low! Guess higher.`;
+        feedback.style.color = "#4fc3f7";
+        lowBound = Math.max(lowBound, guess + 1);
+        rangeHint.textContent = `Range: ${lowBound} – ${highBound}`;
+      } else if (result === "high") {
+        feedback.textContent = `Too high! Guess lower.`;
+        feedback.style.color = "#ef5350";
+        highBound = Math.min(highBound, guess - 1);
+        rangeHint.textContent = `Range: ${lowBound} – ${highBound}`;
+      } else if (result === "correct") {
+        feedback.textContent = `Correct! You got it in ${previousGuesses.length} guess(es)!`;
+        feedback.style.color = "#66bb6a";
+        gameOver = true;
+      }
+
+      input.value = "";
+      input.focus();
+    }
+
+    function resetGame() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      previousGuesses = [];
+      gameOver = false;
+      lowBound = 1;
+      highBound = 100;
+
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("guessList").textContent = "None yet";
+      document.getElementById("guessCount").textContent = "0";
+      document.getElementById("rangeHint").textContent = "Range: 1 – 100";
+      document.getElementById("guessInput").value = "";
+      document.getElementById("guessInput").focus();
+    }
+
+    document.getElementById("guessInput").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        submitGuess();
+      }
+    });
+  </script>
+
+</body>
+</html>
