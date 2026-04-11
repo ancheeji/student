@@ -101,7 +101,6 @@ permalink: /number-guessing-game
       if (result === "duplicate") {
         feedback.textContent = `You already guessed ${guess}! Try again.`;
         feedback.style.color = "#f0a500";
-        previousGuesses.pop();
         guessList.textContent = previousGuesses.join(", ") || "None yet";
         guessCount.textContent = previousGuesses.length;
       } else if (result === "low") {
