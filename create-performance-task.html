@@ -62,7 +62,14 @@ permalink: /number-guessing-game
     let highBound = 100;
 
     function checkGuess(guess, secret, guesses) {
-      if (guesses.includes(guess)) {
+      let isDuplicate = false;
+      for (let i = 0; i < guesses.length; i++) {
+        if (guesses[i] === guess) {
+          isDuplicate = true;
+          break;
+        }
+      }
+      if (isDuplicate) {
         return "duplicate";
       }
 
